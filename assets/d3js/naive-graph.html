@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+  <style>
+
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+  </style>
+  <link rel="stylesheet" href="../../plugin/diagram/revealjs-diagram.css">
+</head>
+<body>
+  <script src="../../plugin/d3js-diagram-offline/d3.v3.min.js"></script>
+  <script src="../../plugin/d3js-diagram-offline/jquery-3.2.1.min.js"></script>
+  <!-- <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script> -->
+  <script src="../../plugin/diagram/revealjs-diagram.js"></script>
+  <script>
+
+    var treeData = {
+      name: 'initial commit?',
+      x0: window.diagram.height / 2,
+      y0: -100,
+      children: []
+    };
+
+
+    // define a function to add multiple nodes
+    function branch() {
+      window.diagram.addItem('master commit 2?', 'initial commit?', treeData)();
+      window.diagram.addItem('branch 1?', 'initial commit?', treeData)();
+      window.diagram.addItem('branch 2?', 'initial commit?', treeData)();
+      window.diagram.addItem('branch 1.1?', 'branch 1?', treeData)();
+      window.diagram.addItem('branch 1.2?', 'branch 2?', treeData)();
+      window.diagram.addItem('branch 1.1.1?', 'branch 1.1?', treeData)();
+      window.diagram.addItem('branch 2.1?', 'branch 2?', treeData)();
+    };
+
+    function removeBranch() {
+      window.diagram.removeItem('master commit 2?', treeData)();
+      window.diagram.removeItem('branch 1?', treeData)();
+      window.diagram.removeItem('branch 2?', treeData)();
+      window.diagram.removeItem('branch 1.1?', treeData)();
+      window.diagram.removeItem('branch 1.2?', treeData)();
+      window.diagram.removeItem('branch 1.1.1?', treeData)();
+      window.diagram.removeItem('branch 2.1?', treeData)();
+    }
+
+    // define a function to add multiple links
+    function addMerge() {
+      window.diagram.addItem('merge commit?!', 'master commit 2?', treeData)();
+      window.diagram.addLink('branch 1.1.1?', 'merge commit?!', treeData)();
+    }
+
+    function removeMerge() {
+      window.diagram.removeItem('merge commit?!', treeData)();
+      window.diagram.removeLink('branch 1.1.1?', 'merge commit?!', treeData)();
+    }
+
+    var _transitions = [
+      window.diagram.addItem('master commit 2?', 'initial commit?', treeData),
+      branch,
+      addMerge
+    ];
+
+    var _inverse_transitions = [
+      window.diagram.removeItem('master commit 2?', treeData),
+      removeBranch,
+      removeMerge
+    ];
+
+    // var _transitions = [
+    //   window.diagram.addItem('master commit 2?', 'initial commit?', treeData),
+    //   window.diagram.addItem('branch 1?', 'initial commit?', treeData),
+    //   window.diagram.addItem('branch 2?', 'initial commit?', treeData),
+    //   window.diagram.addItem('branch 1.1?', 'branch 1?', treeData),
+    //   window.diagram.addItem('branch 1.2?', 'branch 2?', treeData),
+    //   window.diagram.addItem('branch 1.1.1?', 'branch 1.1?', treeData),
+    //   window.diagram.addItem('branch 2.1?', 'branch 2?', treeData),
+    //   window.diagram.addItem('merge into branch 1 into master?!?', 'branch 1.1.1?', treeData),
+    //   window.diagram.addLink('merge into branch 1 into master?!?', 'master commit 2?', treeData),
+    // ];
+
+    // start the tree
+    window.diagram.register('naive-graph', function() {
+      window.diagram.init(treeData);
+    });
+  </script>
+</body>

@@ -1,0 +1,1683 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>git gud</title>
+
+		<meta name="description" content="A dive into git's internals">
+		<meta name="author" content="Pieter Moris">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal-custom.css">
+		<link rel="stylesheet" href="css/theme/black-custom.css" id="theme">
+		<!-- custom transitions, pre body header font -->
+
+		<!-- reveal.js make diagrams align to top without disablingn centering and enabling for every slide
+
+			also see: https://github.com/hakimel/reveal.js/issues/1262
+
+				if( config.top || slide.classList.contains( 'top' ) || slide.classList.contains( 'fig-container' ) ) {
+					slide.style.top = ''
+				}
+
+			increased code block height to 600px from 400px (black-custom.css)
+			.reveal pre code {}
+		 -->
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1 style="font-weight: 400; font-family:ds-font;">git gud</h1>
+					<!-- <h3>or (Don't Fear) the CLI</style></h3> -->
+					<h3>or "How I Learned to Stop Worrying and Love the blob"</h3>
+					<h3>or "It's the Final Commit"</h3>
+					<h3>or "(Don't Fear) the Git"</h3>
+					<p>
+						<small>Created by Pieter Moris&nbsp;<small>and contributors</small></small>
+					</p>
+				</section>
+
+				<section>
+
+					<section>
+						All in all, git is pretty
+						<div class="sl-block" data-block-type="text">
+							<div class="sl-block-content" style="transition-duration: 2s; transition-delay: 1s;" data-animation-type="slide-left">
+								<h1 style="font-family:cursive;"><span class="rainbow">amazing!</span></h1>
+							</div>
+						</div>
+						<br>
+						<span class="fragment">At least, that's what everyone keeps telling me.</span>
+					</section>
+
+					<section>
+						<h3>Does this situation sound familiar?</h3>
+							<img style="border: 0;" height="50%" data-src="assets/img/xkcd-on-git.png" alt="xkcd-git">
+					</section>
+
+					<section>
+						<img data-src="assets/img/use-git-they-said-itll-be-fun-they-said.jpg" alt="they-said">
+					</section>
+
+					<section>
+							<h1>Keep calm</h1>
+							<br>and
+							<!-- <span class="fragment">and</span> -->
+					</section>
+
+					<section data-background="#000000">
+						<audio data-autoplay src="assets/media/you-died.mp3"></audio>
+						<div class="sl-block" data-block-type="text">
+							<div class="sl-block-content" style="transition-duration: 2.5s; transition-delay: 0.2s;" data-animation-type="fade-in">
+								<h1 style="font-weight: 400; font-family:ds-font; color:#974551">git gud</h1>
+							</div>
+						</div>
+					</section>
+
+					<!-- <section>
+							<audio data-autoplay src="assets/media/you-died.mp3"></audio>
+							<h1>Keep calm</h1>
+							<h2 class="fragment scale-down" style="font-weight: 400; font-family:ds-font;">and git gud</h2>
+						</section>
+					</section> -->
+
+					<section data-markdown>
+							<script type="text/template">
+								### Goals
+								- Reveal the nuts and bolts that make `git` tick, so that you will feel less intimidated during day-to-day use.
+								- Make you reassess that XKCD-mindset.
+								- Provide you with adequate background knowledge & tools, so that you can explore and digest `git` documentation on your own.
+							</script>
+					</section>
+
+					<section>
+						<h5>DISCLAIMER</h5>
+						<h6>Resources created by people more knowledgeable and witty than I</h6>
+
+						<ul style="font-size:20px">
+							<li>Git from the Bottom Up: <a href=https://jwiegley.github.io/git-from-the-bottom-up/>https://jwiegley.github.io/git-from-the-bottom-up/</a></li>
+							<li>Git from the inside out: <a href=https://maryrosecook.com/blog/post/git-from-the-inside-out>https://maryrosecook.com/blog/post/git-from-the-inside-out</a></li>
+							<li>How Git Works - Fear Not The SHA! (gitlab): <a href=https://youtu.be/P6jD966jzlk>https://youtu.be/P6jD966jzlk</a></li>
+							<li>OSCON 2016: Dissecting Git's Guts - Git Internals - Emily Xie: <a href=https://youtu.be/YUCwr1Y6bFI>https://youtu.be/YUCwr1Y6bFI</a></li>
+							<li>Advanced Git: Graphs, Hashes, and Compression, Oh My!: <a href=https://youtu.be/ig5E8CcdM9g>https://youtu.be/ig5E8CcdM9g</a></li>
+							<li>The Pro Git book: <a href=https://git-scm.com/book/en/v2>https://git-scm.com/book/en/v2</a></li>
+							<li>Visualizing Git Concepts with D3 (a brilliant resource to get a feel for what different commands actually do!) <a href=https://onlywei.github.io/explain-git-with-d3/>https://onlywei.github.io/explain-git-with-d3/</a></li>
+							<li>Visualizing Git’s Merkle DAG with D3.js: <a href=https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/>https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/</a></li>
+							<li>Git for Computer Scientists: <a href=http://eagain.net/articles/git-for-computer-scientists/>http://eagain.net/articles/git-for-computer-scientists/</a></li>
+							<li>Git is a Directed Acyclic Graph and What the Heck Does That Mean?: <a href=https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059>https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059</a></li>
+						</ul>
+
+						<p><small>Anytime you experience an insightful "AHA!"-moment, you should probably be praising these people, rather than me. Idem ditto whenever you chuckle.</small></p>
+
+					</section>
+
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+							<h1>A brief recap of git</h1>
+					</section>
+
+					<section>
+						<h4>Glossary of terms</h4>
+						<p style="font-size: 35px">Come back to this slide at the end of the presenation.</p>
+						<ul style="font-size: 27px">
+							<li><strong>Repository</strong>: Archive with snapshots of working directory (commits). Defined by <code>.git directory</code>. Can be local or remote. Contains references to branches (heads), tags and remote branches.</li>
+							<li><strong>Working tree or directory</strong>: a directory on your folder with a <code>.git</code> folder.</li>
+							<li><strong>Index or staging area</strong>: a (conceptual) area in between your working directory and repository.</li>
+							<li><strong>Commit</strong>: a snapshot of your working directory at a specific point in time.</li>
+							<li><strong>Branch</strong>: a reference/name/pointer/alias for a specific commit.</li>
+							<li><strong>master</strong>: the default name for your local branch.</li>
+							<li><strong>origin</strong>: the default name for your main remote repository.</li>
+							<li><strong>HEAD</strong>: a file pointing to the currently checked-out branch or commit.</li>
+						</ul>
+						<p style="font-size: 20px">Source: <a href="https://jwiegley.github.io/git-from-the-bottom-up/">https://jwiegley.github.io/git-from-the-bottom-up/</a></p>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							<!-- .slide: style="font-size: 35px" -->
+							### Distributed version control system
+
+							* _Snapshots_<!-- .element: class="emphasized" -->: keep track of previous versions of files (no more `FINAL_final_revised_project3.code` files cluttering up your folders).
+							* _Distributed_<!-- .element: class="emphasized" -->: mirror your project (and its history) on different machines.
+								* There can be many remote repositories, GitHub is just one example.
+								* Also allows you to work offline.
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							<!-- .slide: style="font-size: 32px" -->
+							## What's in a name?
+
+							* **random three-letter combination** that is pronounceable, and not actually used by any common UNIX command. The fact that it is a mispronunciation of "get" may or may not be relevant.
+							* **stupid**. contemptible and despicable. simple. Take your pick from the dictionary of slang.
+							* **"global information tracker"**: you're in a good mood, and it actually works for you. Angels sing, and a light suddenly fills the room.
+							* **"goddamn idiotic truckload of sh*t"**: when it breaks.
+
+							Source: https://github.com/git/git/blob/master/README.md
+						</script>
+					</section>
+
+					<section>
+						<p>The following commands are refered to as <br><span class="emphasized">git porcelain</span> commands;<br>the ones the user normally interacts with.</p>
+						<br>
+						<p>Later on, we'll encounter the so-called <br><span class="emphasized">git plumbing commands</span>;<br>low-level commands to manipulate and inspect objects.</p>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							<!-- .slide: style="font-size: 35px" -->
+							## Creation
+
+							```
+							# create a new repository
+							git init
+							# or retrieve an existing one
+							git clone username@host:/path/to/repository
+							```
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Changes
+
+							![](assets/img/add-commit.png)<!-- .element height="30%" width="30%" -->
+
+							Source:<!-- .element: style="font-size: 15px" --> https://git-scm.com/about/staging-area<!-- .element: style="font-size: 15px" -->
+
+							![](assets/img/branches.png) <!-- .element height="50%" width="50%" -->
+
+							Source:<!-- .element: style="font-size: 15px" --> https://rogerdudler.github.io/git-guide/<!-- .element: style="font-size: 15px" -->
+
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Sharing
+
+							```
+							# sharing your changes
+							git remote add origin <server>
+							git push origin master
+
+							# retrieving changes
+							git pull # or fetch and merge
+							```
+
+						</script>
+					</section>
+
+					<section data-background="#dddddd">
+						<img style="border: 0;" height="50%" data-src="assets/img/git-transport.png" alt="they-said">
+						<p style="font-size: 20px">Source: <a href="https://blog.osteele.com/2008/05/my-git-workflow/">https://blog.osteele.com/2008/05/my-git-workflow/</a></p>
+					</section>
+
+					<section>
+						<p>You might have heard that git is represented by a</p>
+
+						<h4 style="color:#2f8e5a;">Directed Acyclic Graph (DAG)</h4>
+
+						<p>But what are the nodes and edges of this graph? And how does it track files?</p>
+					</section>
+
+					<section class="fig-container"
+					data-fig-id="fig-diagram1"
+					data-file="assets/d3js/naive-graph.html">
+					</section>
+				</section>
+
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Enter the .git directory</h1>
+					</section>
+
+					<section data-background-video="assets/media/creation2.webm" data-background-size="contain" data-background-video-muted="true" data-background-color="#000000">
+					</section>
+
+					<section>
+						<p>That file named <pre><code class="shell">cf/bc74af89ccf0d0ddbe488b4a2df7318786759d</code></pre> is what git refers to as a <span class="emphasized">blob</span>.</p>
+						<br>
+						<p>Blobs are created when you <code>git add</code> files. They're the most basic building block of git.</p>
+						<br>
+						<p class="fragment">But both its name and contents look like nonsense, right?</p>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+							<h1>two, three,</h1>
+							<h1>cha, cha, SHA-1?</h1>
+					</section>
+
+					<section>
+						<h5>Git is a content-addressable filesystem</h5>
+
+						<p>Any kind of content you insert into the repository can be retrieved using a unique key or fingerprint</p>
+
+						<p>That key is a <span class="emphasized">SHA-1</span> checksum of the contents of the file <span style="font-size: 30px">(and a short header)</span>.</p>
+
+						<p>You've probably encountered these before as the names of your commits.</p>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							SHA-1 is a cryptographic hash function.
+
+							Given an input, it provides an output of a fixed size (a hash).
+
+							- Deterministic
+							- One-way
+							- Few collisions
+
+							In git, hashes are usually 40 characters long, but often only the first 7 are needed.
+
+						</script>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+							<h1>Git objects</h1>
+							<h2>Blobs 🍮</h2>
+					</section>
+
+					<section>
+						<h4>So what did <code>"git add dog"</code> achieve?</h4>
+						<br>
+						<ul>
+							<li>Creates a new <span class="emphasized">blob</span> file in <code>.git/objects/</code>.</li>
+							<li>Gives it a unique name by hashing the file content (and a header).</li>
+							<li>The first two characters of the 40 char <span class="emphasized">SHA-1</span> digest forms a sub-directory.</li>
+							<li>The rest forms the file name.</li>
+						</ul>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							#### Blobs and plumbing commands
+
+							Git provides us with a bunch of tools to inspect and even create blobs ourselves.
+
+							```
+							$ tree .git/objects
+							.git/objects/
+							├── cf
+							│   └── bc74af89ccf0d0ddbe488b4a2df7318786759d
+							├── info
+							└── pack
+
+							$ git hash-object dog
+							cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+
+							$ # file contents (and size) produce the hash
+							$ echo "woof" | git hash-object --stdin
+							cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+
+							$ printf "blob 5\000woof\n" | openssl sha1
+							(stdin)= cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+							```
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							#### Blobs and plumbing commands
+
+							Git usually only requires a few hash digits to uniquely identify objects.
+
+							```
+							$ # read object type using short identifier
+							$ git cat-file -t cfbc74a
+							blob
+
+							$ # read object content
+							$ git cat-file -p cfbc74a
+							woof
+							```
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							#### Blobs and plumbing commands
+
+							We couldn't read the contents of the blob directly because files are compressed with zlib first.
+
+							```
+							$ python2 -c 'import sys,zlib; \
+							$	print zlib.decompress(sys.stdin.read());' \
+							$		< .git/objects/cf/bc74af89ccf0d0ddbe488b4a2df7318786759d
+							blob 5woof
+							```
+
+							Blob contents: type - bytes - content
+
+						</script>
+					</section>
+
+					<section id="fragments">
+						<p>This means that if you'd been following along, you will have ended up with the exact same blob.</p>
+
+						<p class="fragment">Every text file with the contents "woof" that you'll ever create in your project (or any other projects) will point to the <span class="emphasized"><em>same blob</em></span>.</p>
+
+						<p class="fragment">Any file with the same content will, even if they have different names. This makes git's storage more efficient. <span style="font-size:30px">But more on that later.</span></p>
+
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							You can even manually create git objects in this manner.
+
+							```
+							$ echo 'miauw' | git hash-object -w --stdin
+							$ tree .git/objects/
+							.git/objects/
+							├── 99
+							│   └── 809ef5ef2a4458e883f53c0ce55fc9f7061844
+							├── cf
+							│   └── bc74af89ccf0d0ddbe488b4a2df7318786759d
+							├── info
+							└── pack
+							```
+
+							However, there are no associated file names for this object yet.
+
+							That's where <span class="emphasized">trees</span> come into play.
+						</script>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+							<h1>Git objects</h1>
+							<h2>Trees 🌳</h2>
+					</section>
+
+					<section>
+						<p>One of the biggest hurdles to wrapping your head around git, is all of its jargon.</p>
+
+						<p>Whenever you see the term <span class="emphasized"><em>tree</em></span>, just think <span class="emphasized"><em>directory</em></span>.</p>
+
+						<span style="font-size: 20px">Note: you might see some people refer to the git graph as a tree as well.</span>
+					</section>
+
+					<section data-background-video="assets/media/tree.webm" data-background-size="contain" data-background-video-muted="true" data-background-color="#000000">
+					</section>
+
+					<!-- <section>
+							<video data-autoplay class="contain" data-src="assets/media/tree.webm"></video>
+					</section> -->
+
+					<section>
+						<h4>Tree objects record the directory structure.</h4>
+
+						<pre><code class="shell" data-trim contenteditable>
+							$ tree .git/objects
+							.git/objects
+							├── 35
+							│   └── eaf2cfe26d5a30558c7aceaad5fadc72a09164
+							├── 99
+							│   └── 809ef5ef2a4458e883f53c0ce55fc9f7061844
+							├── cf
+							│   └── bc74af89ccf0d0ddbe488b4a2df7318786759d
+							├── fa
+							│   └── b9dd251f10ff00622bfd0f069e98b492d433c8
+							├── info
+							└── pack
+
+							$ git cat-file -p 35eaf2c
+							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+						</code></pre>
+
+						<ul style="font-size: 30px">
+							<li>Object in <code>.git/objects</code> with SHA-1-derived name.</li>
+							<li>Contents: 1 line with associated mode, type, filename and SHA-1 hash per target node => this is enough to restore any file.</li>
+							<li>DAG-view: nodes that point to blobs or other trees (i.e. sub-directories).</li>
+							<li>Trees are created from the current state of the <span class="emphasized">index</span> (more on that later).</li>
+							<li>Trees are stored whenever a commit is made.</li>
+							<li>Trees made up of the same blobs/trees always hash to the same digest (type, size, contents).</li>
+						</ul>
+					</section>
+
+					<section>
+							<h4>directed acyclic graph structure</h4>
+
+							<p>Blobs record content of files.</p>
+							<p>Trees record directory structure.</p>
+							<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-tree.png" alt="graph-tree">
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Git objects</h1>
+						<h2>Commits 💾</h2>
+					</section>
+
+					<section>
+						<p>We now have a bunch of tree and blob objects, but we haven't yet found a way to:</p>
+						<br>
+						<ul>
+							<li>Record meta-data about the snapshots (who what where?).</li>
+							<li>Traverse these snapshots.</li>
+						</ul>
+						<br><br>
+						<p>The final type of object, the <span class="emphasized">commit</span>, takes care of this.</p>
+					</section>
+
+					<section>
+						<pre><code class="shell" data-trim contenteditable>
+							$ tree .git/objects
+							.git/objects
+							├── 35
+							│   └── eaf2cfe26d5a30558c7aceaad5fadc72a09164
+							//
+							├── fa
+							│   └── b9dd251f10ff00622bfd0f069e98b492d433c8
+							├── info
+							└── pack
+
+							$ git cat-file -p fab9dd2
+							tree 35eaf2cfe26d5a30558c7aceaad5fadc72a09164
+							author Pieter <13552343+pmoris@users.noreply.github.com> 1535631839 +0200
+							committer Pieter <13552343+pmoris@users.noreply.github.com> 1535631839 +0200
+
+							Initial commit
+						</code></pre>
+
+						<ul style="font-size: 30px">
+							<li>Created alongside tree and points to it.</li>
+							<li>Also contains author, committer, timestamp and commit message.</li>
+							<li>Name is <span class="emphasized">SHA-1</span> digest of contents <span style="font-size: 25px">(and will thus be unique everytime and everywhere)</span>.</li>
+						</ul>
+					</section>
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-commit.png" alt="graph-tree">
+					</section>
+
+					<section>
+						<p>This gives us three <em>"levels"</em> of git objects:</p>
+						<ul style="font-size: 35px">
+							<li class="fragment">Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob.</li>
+							<li class="fragment">Level 2: <span class="emphasized">Trees</span> record the directory structure in a snapshot, of a collection of folders and file revisions.</li>
+							<li class="fragment">Level 3: <span class="emphasized">Commits</span> point to trees and provide meta-data.</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px">
+						<h5>Do you recall that <span class="emphasized">cat blob</span> we created manually?</h5>
+						<p>It's possible, using only <emp>git plumbing commands</emp>, to create a tree object that references it.</p>
+						<p>It's also possible to manually create a commit object that points to this tree and to notify our repo that this commit exists in our branch to make it reachable.</p>
+						<br>
+						<p style="font-size: 25px">You can refer to <a href="https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/4-how-trees-are-made.html">this</a> and <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">this</a> guide for a full overview.</p>
+					</section>
+
+					<section>
+						<p>1. Add the file to the staging area and write its contents to a tree object.</p>
+						<pre><code class="shell" data-trim contenteditable>
+							# add file to staging area - equivalent to `git add`
+							$  master 1  git update-index --add --cacheinfo 100644 99809ef5ef2a4458e883f53c0ce55fc9f7061844 cat
+
+							# the index contains files and directories to be recorded by tree
+							$  master 1  git ls-files --stage
+							100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
+							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+
+							# create tree object - normally handled by `git commit`
+							$  master ● 1 ✚ 1  git write-tree
+							a8fd4f7e27f7b943a6b1ae5e84430d56d234526c
+
+							$  master ● 1 ✚ 1  git cat-file -p a8fd
+							100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
+							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+						</code></pre>
+					</section>
+					<section style="font-size: 35px">
+						<p>2. Next we create a new commit object and chain it the one before it.</p>
+						<pre><code class="shell" data-trim contenteditable>
+							# create commit object - normally handled by `git commit`
+							$  master ● 1 ✚ 1  echo "2nd commit manual" | git commit-tree a8fd4f7 -p fab9dd2
+							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+
+							$  master ● 1 ✚ 1  git cat-file -p 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+							tree a8fd4f7e27f7b943a6b1ae5e84430d56d234526c
+							parent fab9dd251f10ff00622bfd0f069e98b492d433c8
+							author Pieter <13552343+pmoris@users.noreply.github.com> 1535829462 +0200
+							committer Pieter <13552343+pmoris@users.noreply.github.com> 1535829462 +0200
+
+							2nd commit manual
+						</code></pre>
+						<p class="fragment">This second commit object has an extra line containing a tree object!</p>
+						<p class="fragment">We're now ready to see how git keeps track of the <em>history</em> of our project.</p>
+					</section>
+
+					<!-- <section>
+						<p>So far so good, we've <span style="font-size:30px">(almost)</span> succesfully reproduced the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
+						<p>We're now ready to see how git keeps track of the history of your project.</p>
+					</section> -->
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-manual-noref.png" alt="graph-manual-noref">
+						<p style="font-size: 30px">By chaining commits, each one pointing to its parent, a history is formed.</p>
+					</section>
+
+					<section>
+						<ul style="font-size: 35px">
+							<li>Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob.</li>
+							<li>Level 2: <span class="emphasized">Trees</span> record the directory structure in a snapshot, of a collection of folders and file revisions.</li>
+							<li>Level 3: <span class="emphasized">Commits</span> point to trees, provide meta-data <span class="fragment"><strong>and can be chained to one another in order to form a history</strong>.</span></li>
+						</ul>
+						<br>
+						<br>
+						<h5 class="fragment">New commits <strong>always</strong> point to their parents (i.e. backwards in time), never the other way around!<br><span style="font-size: 30px">(cf. <span class="emphasized">directed acyclic graph</span>)</span></h5>
+					</section>
+
+					<section>
+						<p>At this point you could recall the history by calling the log command on the new commit.</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$   master ● 1 ✚ 1  git log --stat 0ed44be
+							commit 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+							Author: Pieter <13552343+pmoris@users.noreply.github.com>
+							Date:   Sat Sep 1 21:17:42 2018 +0200
+
+								2nd commit manual
+
+								cat | 1 +
+								1 file changed, 1 insertion(+)
+
+							commit fab9dd251f10ff00622bfd0f069e98b492d433c8 (HEAD -> master)
+							Author: Pieter <13552343+pmoris@users.noreply.github.com>
+							Date:   Sat Sep 1 21:14:04 2018 +0200
+
+								Initial commit
+
+								dog | 1 +
+								1 file changed, 1 insertion(+)
+						</code></pre>
+					</section>
+					<section>
+						<p>So far so good, we've <span style="font-size:30px">(almost)</span> succesfully reproduced the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
+						<br>
+						<p class="fragment">But why doesn't the regular git status command work at this point? And where do branches come into play?</p>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>References and branches ⎇</h1>
+					</section>
+
+					<section>
+						<p>So how does git keep track of what commit we're <em>currently on</em>?</p>
+						<p class="fragment">The answer is <span class="emphasized">branches</span>!</p>
+						<p class="fragment">Their nature and behaviour will also become more clear when we look at them from a DAG perspective.</p>
+					</section>
+
+					<section>
+						<h4>Branches are nothing more than <span class="emphasized">references</span> or pointers or aliases to specific commit objects.</h4>
+						<br>
+						<p class="fragment">They provide names for certain points in the graph and allow us to easily access them, instead of having to remember the hash digests of specific commits.</p>
+					</section>
+
+					<section>
+						<p>Branches reside in...</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$  master ● 1 ✚ 1  ls .git/refs/heads/
+							master
+						</code></pre>
+						<br>
+						<p>And are simply plain text files pointing to a commit.</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$  master ● 1 ✚ 1 cat .git/refs/heads/master
+							fab9dd251f10ff00622bfd0f069e98b492d433c8
+						</code></pre>
+					</section>
+
+					<!-- <section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-master.png" alt="graph-master">
+						<p>Currently our branch is still pointing to our initial commit object.</p>
+					</section> -->
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-master-manual.png" alt="graph-master">
+						<p style="font-size: 35px">The master branch is pointing to the initial commit we created using the regular <span class="emphasized">porcelain</span> commands.</p>
+						<!-- <p>These are the objects we created using the <span class="emphasized">plumbing</span> commands.</p> -->
+					</section>
+
+					<section>
+						<p style="font-size: 30px">We can update the master reference to point to the new commit.</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$  master ● 1 ✚ 1  git update-ref refs/heads/master 0ed44be
+
+							$  master ✚ 1  cat .git/refs/heads/master
+							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+
+							$  master ✚ 1  git log
+							commit 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1 (HEAD -> master)
+							Author: Pieter <13552343+pmoris@users.noreply.github.com>
+							Date:   Sat Sep 1 21:17:42 2018 +0200
+
+								2nd commit manual
+
+							commit fab9dd251f10ff00622bfd0f069e98b492d433c8
+							Author: Pieter <13552343+pmoris@users.noreply.github.com>
+							Date:   Sat Sep 1 21:14:04 2018 +0200
+
+								Initial commit
+						</code></pre>
+						<p class="fragment" style="font-size: 30px">Normally, this moving of the reference branch happens behind the scenes when we use the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
+						<!-- <p class="fragment" style="font-size: 30px">This is the final aspect of what happens behind the scenes when we use the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p> -->
+					</section>
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-manual-updated.png" alt="graph-manual-updated">
+					</section>
+
+					<section>
+						<p>Let's create a new branch now to see how it affects the graph.</p>
+					</section>
+
+					<section>
+						<pre><code class="shell" data-trim contenteditable>
+							# retrieve the cat object from our repository
+							# and place it in the working directory to tidy up
+							$  master ✚ 1  git cat-file -p 99809ef5 > cat
+
+							# Create new branch
+							$  master  git checkout -b "no-cats-allowed"
+							Switched to a new branch 'no-cats-allowed'
+
+							# Check references
+							$  no-cats-allowed ✚ 1  cat .git/refs/heads/no-cats-allowed
+							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+
+							$ Check current commit
+							$  no-cats-allowed ✚ 1  git rev-parse HEAD
+							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+						</code></pre>
+
+						<p>Creating a new branch merely adds a reference to the same commit we were on before. It is literally <span class="emphasized">just a text file</span>.</p>
+					</section>
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch.png" alt="graph-branch">
+					</section>
+
+					<section>
+						<pre><code class="shell" data-trim contenteditable>
+							$  no-cats-allowed  git rm cat
+							rm 'cat'
+							$  no-cats-allowed ● 1  mkdir doge
+							$  no-cats-allowed ● 1  echo "bark" > doge/much
+							$  no-cats-allowed ● 1 … 1  echo "floof" > doge/very
+							$  no-cats-allowed ● 1 … 1  git add doge/
+							$  no-cats-allowed ● 3  git status
+							On branch no-cats-allowed
+							Changes to be committed:
+								(use "git reset HEAD &lt;file&gt;..." to unstage)
+
+								deleted:    cat
+								new file:   doge/much
+								new file:   doge/very
+
+							$  no-cats-allowed ● 3  git commit -m "doggies"
+							[no-cats-allowed 40da2ef] doggies
+								3 files changed, 2 insertions(+), 1 deletion(-)
+								delete mode 100644 cat
+								create mode 100644 doge/much
+								create mode 100644 doge/very
+
+							$  no-cats-allowed  git rev-parse HEAD
+							40da2ef175b6693c785251467946f1cdaf5e6552
+							$  no-cats-allowed  git cat-file -p HEAD
+							tree 60c51895339b14261e18cb4555b4a43d1cfdc397
+							parent 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+							author Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+							committer Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+
+							doggies
+						</code></pre>
+					</section>
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2.png" alt="graph-branch2">
+					</section>
+
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>A little something about graph properties</h1>
+					</section>
+
+					<section>
+						<h4>Advantages of a DAG</h4>
+						<ul>
+							<li>Only 1 copy of a file is stored regardless of the number of snapshots.</li>
+							<li>History can be rewound from any point in the graph.</li>
+							<li>Refs provide entrypoints through meaningful names (i.e. bookmarks).</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px">
+						<h3>Git is also a <span class="emphasized">Merkle Graph</span></h3>
+						<p>The <span class="emphasized">SHA-1</span> hash names used for git objects provides an elegant way to verify the integrity of all the data in the repository.</p>
+						<p class="fragment">The hash of any one object depends on the hashes (and contents) of all the files that came before it. A similar technique is used by Bitcoin and BitTorrent. <span style="font-size: 25px">(But <a href="https://stackoverflow.com/questions/46192377/why-is-git-not-considered-a-block-chain">don't call git a blockchain</a> unless you want to anger some people.)</span></p>
+						<p class="fragment">This is also the reason why re-writing history can be dangerous in git. Everything downstream will be affected. <span style="font-size: 25px">(Although this generally only becomes a problem when working with collaborators.)</span></p>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Don't lose your <em>HEAD</em></h1>
+					</section>
+
+					<section>
+						<p>How does git know which working directory to show us and which branch to operate on when we use porcelain commands like <code>git commit</code>?</p>
+
+						<p class="fragment">That's where <span class="emphasized">HEAD</span> comes into play.</p>
+					</section>
+
+					<section>
+						<pre><code class="shell" data-trim contenteditable>
+							$  no-cats-allowed  cat .git/HEAD
+							ref: refs/heads/no-cats-allowed
+
+							$  no-cats-allowed  cat .git/refs/heads/no-cats-allowed
+							40da2ef175b6693c785251467946f1cdaf5e6552
+
+							$  no-cats-allowed  git rev-parse HEAD
+							40da2ef175b6693c785251467946f1cdaf5e6552
+
+							$  no-cats-allowed  git cat-file -p HEAD
+							tree 60c51895339b14261e18cb4555b4a43d1cfdc397
+							parent 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+							author Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+							committer Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+
+							doggies
+						</code></pre>
+
+						<p class="fragment" style="font-size: 35px">This is the final aspect of what happens behind the scenes when we use the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
+					</section>
+
+					<section>
+						<h4>HEAD...</h4>
+						<ul>
+							<li>Is a flat text file in the <code>.git</code> directory.</li>
+							<li>Points to the current reference, i.e. a label for a specific commit.</li>
+							<li>Is updated whenever we commit or checkout a branch or commit.</li>
+						</ul>
+						<br><br>
+						<p class="fragment" style="font-size: 35px">More slightly confusing jargon: “head” refers to any one of the named refs in the repository; “HEAD” refers to the currently active one.</p>
+					</section>
+
+					<section>
+						<h4>directed acyclic graph structure</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-head.png" alt="graph-branch-head">
+					</section>
+
+					<section>
+						<h4>Detached HEAD?!1</h4>
+
+						<p>A <span style="font-size: 30px">(rather odd)</span> way of saying that we are checking out a commit that <span class="emphasized">no branch points to directly</span>.</p>
+
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-det-head.png" alt="graph-det-head">
+					</section>
+				</section>
+
+				<section>
+					Emphasize direction of arrows/point back in time
+					Emphasize that commits can have multiple parents
+					
+					merge rebase https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/7-branching-and-the-power-of-rebase.html
+					fast forward
+
+					https://codewords.recurse.com/issues/two/git-from-the-inside-out
+					checkout will be prevented if working copy/current commit/checkingout commit differ
+
+					merging ff https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+
+					tags + remote refs (add to refs section or useful tidbits)
+					https://git-scm.com/book/en/v2/Git-Internals-Git-References
+
+					git diff
+					git stash
+					.gitignore
+
+					checkout/clean/revert
+
+					git pretty graph
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Index or staging area</h1>
+					</section>
+					<section>
+						<p>We glossed over this earlier, but for the sake of completion.</p>
+						<br>
+						<h4>The index is the staging area in between the working directory and a commit.</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/staging-area.png" alt="staging-area">
+						<p style="font-size: 20px">For a good write-up, see: <a href="https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git">https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git</a></p>
+					</section>
+					<section>
+						<p>Conceptually it's an ever-changing tree object stored as a single large binary file .git/index</p>
+						<p>It can be viewed via (see previous slides)</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$  master 1  git ls-files --stage
+								100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
+								100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+						</code></pre>
+					</section>
+					<section>
+						<ul>
+							<li>Easy way to reset without reverting commits.</li>
+							<li>Allows splitting new changes into multiple commits.</li>
+							<li>Simplifies merging.</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Moving around the graph</h1>
+					</section>
+
+					<section>
+	https://stackoverflow.com/questions/673407/how-do-i-clear-my-local-working-directory-in-git
+	reset vs checkout
+	https://sethrobertson.github.io/GitFixUm/fixup.html#pushed_new_simple
+	https://stackoverflow.com/questions/5798930/git-rm-cached-x-vs-git-reset-head-x
+					</section>
+				</section>
+
+				<section data-background-transition="zoom" data-background="#21704b">
+					<h1>A few more useful tidbits</h1>
+				</section>
+
+				<section>
+					<section>
+						<!-- id="fragment" works but fragments messes things up -->
+						<h4>Local vs remote branches</h4>
+						<p style="font-size: 35px">A common point of confusion is the relation between local and remote branches.</p>
+						<p style="font-size: 35px">As we've seen, branches are just references to specific commits. Ergo, remote branches are pointers to specific commits on the remote repository.</p>
+						<p style="font-size: 35px">You can't move these references yourself.</p>
+						<p style="font-size: 20px">More info: <a href="https://git-scm.com/book/en/v2/Git-Branching-Remote-Branches">https://git-scm.com/book/en/v2/Git-Branching-Remote-Branches</a></p>
+					</section>
+
+					<section>
+						<h4>Your branch is up-to-date with 'origin/master'...</h4>
+						<h4>...except it's not?</h4>
+						<p class="fragment" style="font-size: 35px">
+							This means you're up-to-date with the ref called origin/master, which is a <span class="emphasized">local reference</span> on your <span class="emphasized">local repo</span> stored in <code>.git/refs/remotes/origin/master</code>.
+						</p>
+						<p class="fragment"  style="font-size: 35px">
+							This ref is tracking the remote master branch, but your local repository does not know its state until you perform a fetch or pull.
+						</p>
+					</section>
+
+					<section>
+						<p>This also explains why you must sometimes do a merge with origin/master.</p>
+						<img style="border: 0;" class="stretch" data-src="assets/img/remote-branches.png" alt="remote-branches">
+						<br>
+					</section>
+
+					<section>
+						<p>Oh, and the following two steps are equivalent.</p>
+						<pre><code class="hljs" data-trim contenteditable>
+							$ git pull
+						</code></pre>
+						<pre><code class="hljs" data-trim contenteditable>
+							$ git fetch
+							$ git merge origin/master
+						</code></pre>
+					</section>
+
+					<section>
+						<h3>Removing local and remote branches</h3>
+
+						<pre><code class="hljs" data-trim contenteditable>
+							$ git push --delete remote_name branch_name
+							$ git branch -d branch_name
+						</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h3>Packfiles, garbage collection and deltas</h3>
+
+						<p>I mentioned that git doesn't store diffs, but every new file (based on its contents) is stored in its unique blob.</p>
+
+						<p>But this is not the whole story.</p>
+
+						<p>Git does regularly create binary delta's called <span class="emphasized">packfiles</span> based on its internal objects. You can manually trigger this by calling <code>git gc</code>.</p>
+
+						<p style="font-size: 20px">More info: <a href="	https://git-scm.com/book/en/v2/Git-Internals-Packfiles">https://git-scm.com/book/en/v2/Git-Internals-Packfiles</a></p>
+					</section>
+
+					<section>
+						<h3>Revision names and syntax</h3>
+
+						<p>There's an extensive amount of syntax to refer to specific commits.</p>
+
+						<pre><code>
+							HEAD
+							HEAD^ # parent
+							HEAD^^ # parent's parent
+							HEAD^2 # second parent if commit has >1 parent
+							HEAD~n # n'th generation ancestor
+						</code></pre>
+
+						<ul>
+							<li><a href="https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/6-a-commit-by-any-other-name.html">https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/6-a-commit-by-any-other-name.html</a></li>
+							<li><a href="https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection">https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection</a></li>
+						</ul>
+					</section>
+
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h4>So you accidentally commited sensitive data to your repo...</h4>
+					</section>
+
+					<section>
+						<img style="border: 1;" height="100%" data-src="assets/img/panic-kermit.gif" alt="kermit">
+					</section>
+
+					<section>
+						<h3>Sensitive data in second commit</h3>
+						<!-- style="width: 1280px;" -->
+						<pre><code class="hljs" data-trim contenteditable>
+							$ mkdir kakapo-repo && cd kakapo-repo/ && git init
+							Initialized empty Git repository in /media/pieter/DATA/Wetenschap/Doctoraat/biodm/reboot2018/kakapo-repo/.git/
+							$  No commits yet on master  touch cultofthepartyparrot
+							$  No commits yet on master … 1  git add -A
+							$  No commits yet on master ● 1  git commit -m "Initial kakapo commit"
+							[master (root-commit) 0e7e785] Initial kakapo commit
+								1 file changed, 0 insertions(+), 0 deletions(-)
+								create mode 100644 cultofthepartyparrot
+							$  master  echo 'https://www.youtube.com/watch?v=9T1vfsHYiKY' \
+									> secretsofthekakapo
+							$  master … 1  git add -A
+							$  master ● 1  git commit -m "Maybe this is better kept private..."
+							[master 920a49e] Maybe this is better kept private...
+								1 file changed, 1 insertion(+)
+								create mode 100644 secretsofthekakapo
+							$  master  git hash-object secretsofthekakapo
+							29d7910d2fcf6bdb5dfbbbd1dc725d9a5648f7d7
+						</code></pre>
+					</section>
+					<section>
+						<h3>Removing it from subsequent commits doesn't achieve anything</h3>
+						<pre><code class="hljs" data-trim contenteditable>
+							$  master  touch sirocco
+							$  master … 1  rm secretsofthekakapo
+							$  master ✚ 1 … 1  git add -A
+							$  master ● 2  git commit -m "More kakapos and removed compromising material"
+							[master 7b8164b] More kakapos and removed compromising material
+								2 files changed, 1 deletion(-)
+								delete mode 100644 secretsofthekakapo
+								create mode 100644 sirocco
+							$  master  git checkout HEAD^
+							$  920a49e  ls
+							cultofthepartyparrot  secretsofthekakapo
+						</code></pre>
+					</section>
+					<section>
+						<h3>Use the filter-branches command</h3>
+						<pre><code class="hljs" data-trim contenteditable>
+							$  920a49e  git checkout master
+							Previous HEAD position was 920a49e Maybe this is better kept private...
+							Switched to branch 'master'
+							$  master  git filter-branch --force --index-filter \
+							'git rm --cached --ignore-unmatch secretsofthekakapo' \
+							--prune-empty --tag-name-filter cat -- --all
+							Rewrite 920a49ef4d3e4558c42dd50e5700697b6e182900 (2/3) (0 seconds passed, remaining 0 predicted)    rm 'secretsofthekakapo'
+							Rewrite 7b8164b0ede12d9486e5de0d3aea371185da1b0f (3/3) (0 seconds passed, remaining 0 predicted)
+							Ref 'refs/heads/master' was rewritten
+							$  master  git push origin --force --all
+						</code></pre>
+						<p style="font-size: 30px">This is one of the few occassions where you should use <code>push --force</code>.</p>
+						<p style="font-size: 20px">More info: <a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/">https://help.github.com/articles/removing-sensitive-data-from-a-repository/</a>
+						<br/>
+						<a href="https://stackoverflow.com/questions/36255221/what-is-the-difference-between-tree-filter-and-index-filter-in-the-git">https://stackoverflow.com/questions/36255221/what-is-the-difference-between-tree-filter-and-index-filter-in-the-git</a>
+						</p>
+					</section>
+					<section>
+						<h3>Clean up leftovers</h3>
+						<pre><code class="hljs" data-trim contenteditable>
+							$  master  git cat-file -p  29d7
+							https://www.youtube.com/watch?v=9T1vfsHYiKY
+							$  master  git for-each-ref --format='delete %(refname)' \
+								refs/original | git update-ref --stdin
+							$  master  git reflog expire --expire=now --all
+							$  master  git gc --prune=now
+							Counting objects: 5, done.
+							Delta compression using up to 8 threads.
+							Compressing objects: 100% (3/3), done.
+							Writing objects: 100% (5/5), done.
+							Total 5 (delta 0), reused 0 (delta 0)
+							$  master  git cat-file -p  29d7
+							fatal: Not a valid object name 29d7
+
+						</code></pre>
+						<p style="font-size: 20px">More info about final clean up: <a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/">https://help.github.com/articles/removing-sensitive-data-from-a-repository/</a>
+						<br/><a href="https://stackoverflow.com/questions/16584256/after-filter-branch-ing-to-remove-file-from-git-repo-file-remains-in-pack-file">https://stackoverflow.com/questions/16584256/after-filter-branch-ing-to-remove-file-from-git-repo-file-remains-in-pack-file</a>
+						</p>
+					</section>
+				</section>
+
+				<section>
+					<h4>Initial setup, managing SSL keys, creating your own remote repositories, etc.</h4>
+					<p>There's a bunch of stuff to know outside of regular usage. Fortunately, most of these things can be found in one of the many excellent resources online. The <a href="https://git-scm.com/book/en/v2">Pro Git book</a> is usually a good starting point.</p>
+				</section>
+
+				<section>
+					<h3>That's all folks!</h3>
+
+					<p>This should set you up to make your git experience smooth <strike>sailing</strike> cruising from here on out.</p>
+
+					<img style="border: 1;" height="100%" data-src="assets/img/cruising.gif" alt="cruising">
+				</section>
+
+				<section>
+					<section>
+						<h3>Challenges</h3>
+						<p>Have a look at this excellent interactive visualisation to reinforce some of the concepts we've gone over: <a href="https://onlywei.github.io/explain-git-with-d3/">https://onlywei.github.io/explain-git-with-d3/</a></p>
+					</section>
+
+					<section>
+						<h3>Challenges</h3>
+						<ol style="font-size: 30px">
+							<li>Create a simple "Hello World" repository with a few commits and/or branches, keeping an eye on the <code>.git/objects</code> directory as you do so and using the <code>git cat-file -p/t</code> commands to inspect new objects.</li>
+							<li>What would happen if you delete the <code>.git/index</code> file after staging content? Think about it, then try it!</li>
+							<li>Does a <code>git commit --amend</code> change the name (i.e. SHA-1 digest) of the commit that is updated? Think about it, then try it! <span style="font-size: 25px">Read up on the amend command <a href="https://www.atlassian.com/git/tutorials/rewriting-history">here</a> if you're not familiar with this command.</span></li>
+						</ol>
+					</section>
+
+					<section>
+						<h3>Challenges</h3>
+						<ol style="font-size: 30px">
+							<li>Explore the git game: <a href="https://www.git-game.com/">https://www.git-game.com/</a>.</li>
+							<li>Or the interactive guide to branching, cherry-picking and rebasing: <a href="https://learngitbranching.js.org/">https://learngitbranching.js.org/</a>.</li>
+						</ol>
+						<p>For all of these activities, try to keep the DAG structure of git in the back of your mind.</p>
+					</section>
+				</section>
+
+				<section>
+						- stash and pop
+
+						- detached head
+
+						- remove local/remote branch: https://stackoverflow.com/questions/2003505/how-do-i-delete-a-git-branch-both-locally-and-remotely
+
+						- upstream: https://stackoverflow.com/questions/5697750/what-exactly-does-the-u-do-git-push-u-origin-master-vs-git-push-origin-ma
+						- .gitignore use it! + global!
+							- clean up:
+
+							https://stackoverflow.com/questions/1274057/how-to-make-git-forget-about-a-file-that-was-tracked-but-is-now-in-gitignore
+							https://eric.blog/2014/05/11/remove-files-from-git-addingupdating-gitignore/
+							https://stackoverflow.com/questions/16584256/after-filter-branch-ing-to-remove-file-from-git-repo-file-remains-in-pack-file
+
+								git rm -r --cached .
+								git add . # -A
+								git commit -am "Remove ignored files"
+
+							### Remove ignored files
+
+							https://stackoverflow.com/questions/61212/how-to-remove-local-untracked-files-from-the-current-git-working-tree
+
+								git clean -nX
+							change n to f to perform...
+
+						- For tracked files you can use `git stash` and `git stash pop`.
+
+					</section>
+				</section>
+
+
+
+
+				<section>
+
+					what are trees
+					what is staging/index
+					head vs index
+					reset vs checkout changes what head is pointing to
+					fast forward vs three way merge
+
+					what's the advantage of the staging area
+
+					git push -U
+
+					adding stores blob, safe until garbage collection unless reachable
+					https://stackoverflow.com/questions/4084921/what-does-the-git-index-contain-exactly
+					$ git ls-files --stage
+
+					https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html#introducing-sha-1
+						useful image
+
+						https://stackoverflow.com/a/43666212
+						git pack files
+
+					Git is a content-addressable filesystem. Great. What does that mean? It means that at the core of Git is a simple key-value data store. What this means is that you can insert any kind of content into a Git repository, for which Git will hand you back a unique key you can use later to retrieve that content.
+
+					what is detached head
+
+					git checkout vs reset
+
+					cleaning files
+
+					whom do you follow analogy
+
+					direction of arrows
+
+					So wait, what is a commit then? It’s a snapshot of the state of your files, plus some metadata such as who made the commit and when, with a comment, and a pointer to the previous commit(s). That pointer is part of what makes a unique commit. This is why actions that change the parent, such as rebase and cherry-pick, create a new commit with a new ID. This is why re-writing history with those actions on commits you’ve already pushed to a shared repository can cause grief for your collaborators and is a stern no-no. If I’ve built on top of commit A, such that my commit B includes a pointer to A as its parent, and you rebase and replace A with toothpaste, my B is orphaned, pointing to a parent that is no longer part of the history.
+
+					Say it with me: A branch is nothing more than a named reference to a commit.
+
+					quick recap: point of git (snapshots), decentralized,
+
+					garbage collection
+
+
+
+				</section>
+
+					<section>
+							https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
+							content addressable file system
+					</section>
+
+					<section>
+						https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
+
+						low-level commands: manipulate and inspect objects in git
+					</section>
+
+					<section>
+							<pre><code class="hljs" data-trim contenteditable>
+									function linkify( selector ) {
+									  if( supports3DTransforms ) {
+									
+										var nodes = document.querySelectorAll( selector );
+									
+										for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
+										  var node = nodes[i];
+									
+										  if( !node.className ) {
+											node.className += ' roll';
+										  }
+										}
+									  }
+									}
+														</code></pre>
+					</section>
+
+					<section>
+						trees
+
+						So whenever you see the git docs talk about trees, just think: directory.
+					</section>
+
+					<section>
+						commits
+					</section>
+				</section>
+
+				<section>
+					<section>
+						index = staging area
+					</section>
+				</section>
+
+				<section data-background="#974551" data-background-transition="zoom">
+					<section data-background="#974551" data-background-transition="zoom">
+						<h1>How do I get out of this mess 101</h1>
+					</section>
+					<section>
+						- retrieving deleted file
+						- removing files completely from .git (privacy/size)
+						- interactive rebasing
+						- graph
+						- comparing files in branches
+						- undoing a merge
+					</section>
+				</section>
+
+
+				<section>
+					<h2>Hello There</h2>
+					<p>
+						reveal.js enables you to create beautiful interactive slide decks using HTML. This presentation will show you examples of what it can do.
+					</p>
+				</section>
+
+				<!-- Example of nested vertical slides -->
+				<section>
+					<section>
+						<h2>Vertical Slides</h2>
+						<p>Slides can be nested inside of each other.</p>
+						<p>Use the <em>Space</em> key to navigate through all slides.</p>
+						<br>
+						<a href="#" class="navigate-down">
+							<img width="178" height="238" data-src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" alt="Down arrow">
+						</a>
+					</section>
+					<section>
+						<h2>Basement Level 1</h2>
+						<p>Nested slides are useful for adding additional detail underneath a high level horizontal slide.</p>
+					</section>
+					<section>
+						<h2>Basement Level 2</h2>
+						<p>That's it, time to go back up.</p>
+						<br>
+						<a href="#/2">
+							<img width="178" height="238" data-src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" alt="Up arrow" style="transform: rotate(180deg); -webkit-transform: rotate(180deg);">
+						</a>
+					</section>
+				</section>
+
+				<section>
+					<h2>Slides</h2>
+					<p>
+						Not a coder? Not a problem. There's a fully-featured visual editor for authoring these, try it out at <a href="https://slides.com" target="_blank">https://slides.com</a>.
+					</p>
+				</section>
+
+				<section>
+					<h2>Point of View</h2>
+					<p>
+						Press <strong>ESC</strong> to enter the slide overview.
+					</p>
+					<p>
+						Hold down alt and click on any element to zoom in on it using <a href="http://lab.hakim.se/zoom-js">zoom.js</a>. Alt + click anywhere to zoom back out.
+					</p>
+				</section>
+
+				<section>
+					<h2>Touch Optimized</h2>
+					<p>
+						Presentations look great on touch devices, like mobile phones and tablets. Simply swipe through your slides.
+					</p>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						## Markdown support
+
+						Write content using inline or external Markdown. Single `code` snippet in-line.
+						Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
+
+						```
+						<section data-markdown>
+						  ## Markdown support
+
+						  Write content using inline or external Markdown.
+						  Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
+						</section>
+						```
+					</script>
+				</section>
+
+				<section>
+					<section id="fragments">
+						<h2>Fragments</h2>
+						<p>Hit the next arrow...</p>
+						<p class="fragment">... to step through ...</p>
+						<p><span class="fragment">... a</span> <span class="fragment">fragmented</span> <span class="fragment">slide.</span></p>
+
+						<aside class="notes">
+							This slide has fragments which are also stepped through in the notes window.
+						</aside>
+					</section>
+					<section>
+						<h2>Fragment Styles</h2>
+						<p>There's different types of fragments, like:</p>
+						<p class="fragment grow">grow</p>
+						<p class="fragment shrink">shrink</p>
+						<p class="fragment fade-out">fade-out</p>
+						<p class="fragment fade-up">fade-up (also down, left and right!)</p>
+						<p class="fragment current-visible">current-visible</p>
+						<p>Highlight <span class="fragment highlight-red">red</span> <span class="fragment highlight-blue">blue</span> <span class="fragment highlight-green">green</span></p>
+					</section>
+				</section>
+
+				<section id="transitions">
+					<h2>Transition Styles</h2>
+					<p>
+						You can select from different transitions, like: <br>
+						<a href="?transition=none#/transitions">None</a> -
+						<a href="?transition=fade#/transitions">Fade</a> -
+						<a href="?transition=slide#/transitions">Slide</a> -
+						<a href="?transition=convex#/transitions">Convex</a> -
+						<a href="?transition=concave#/transitions">Concave</a> -
+						<a href="?transition=zoom#/transitions">Zoom</a>
+					</p>
+				</section>
+
+				<section id="themes">
+					<h2>Themes</h2>
+					<p>
+						reveal.js comes with a few themes built in: <br>
+						<!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black (default)</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/sky.css'); return false;">Sky</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/beige.css'); return false;">Beige</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/simple.css'); return false;">Simple</a> <br>
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/serif.css'); return false;">Serif</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/blood.css'); return false;">Blood</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/night.css'); return false;">Night</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/moon.css'); return false;">Moon</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a>
+					</p>
+				</section>
+
+				<section>
+					<section data-background="#dddddd">
+						<h2>Slide Backgrounds</h2>
+						<p>
+							Set <code>data-background="#dddddd"</code> on a slide to change the background color. All CSS color formats are supported.
+						</p>
+						<a href="#" class="navigate-down">
+							<img width="178" height="238" data-src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" alt="Down arrow">
+						</a>
+					</section>
+					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png">
+						<h2>Image Backgrounds</h2>
+						<pre><code class="hljs">&lt;section data-background="image.png"&gt;</code></pre>
+					</section>
+					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png" data-background-repeat="repeat" data-background-size="100px">
+						<h2>Tiled Backgrounds</h2>
+						<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code></pre>
+					</section>
+					<section data-background-video="https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.mp4,https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.webm" data-background-color="#000000">
+						<div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+							<h2>Video Backgrounds</h2>
+							<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background-video="video.mp4,video.webm"&gt;</code></pre>
+						</div>
+					</section>
+					<section data-background="http://i.giphy.com/90F8aUepslB84.gif">
+						<h2>... and GIFs!</h2>
+					</section>
+				</section>
+
+				<section data-transition="slide" data-background="#4d7e65" data-background-transition="zoom">
+					<h2>Background Transitions</h2>
+					<p>
+						Different background transitions are available via the backgroundTransition option. This one's called "zoom".
+					</p>
+					<pre><code class="hljs">Reveal.configure({ backgroundTransition: 'zoom' })</code></pre>
+				</section>
+
+				<section data-transition="slide" data-background="#b5533c" data-background-transition="zoom">
+					<h2>Background Transitions</h2>
+					<p>
+						You can override background transitions per-slide.
+					</p>
+					<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background-transition="zoom"&gt;</code></pre>
+				</section>
+
+				<section>
+					<h2>Pretty Code</h2>
+					<pre><code class="hljs" data-trim contenteditable>
+function linkify( selector ) {
+  if( supports3DTransforms ) {
+
+    var nodes = document.querySelectorAll( selector );
+
+    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
+      var node = nodes[i];
+
+      if( !node.className ) {
+        node.className += ' roll';
+      }
+    }
+  }
+}
+					</code></pre>
+					<p>Code syntax highlighting courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>
+				</section>
+
+				<section>
+					<h2>Marvelous List</h2>
+					<ul>
+						<li>No order here</li>
+						<li>Or here</li>
+						<li>Or here</li>
+						<li>Or here</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Fantastic Ordered List</h2>
+					<ol>
+						<li>One is smaller than...</li>
+						<li>Two is smaller than...</li>
+						<li>Three!</li>
+					</ol>
+				</section>
+
+				<section>
+					<h2>Tabular Tables</h2>
+					<table>
+						<thead>
+							<tr>
+								<th>Item</th>
+								<th>Value</th>
+								<th>Quantity</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Apples</td>
+								<td>$1</td>
+								<td>7</td>
+							</tr>
+							<tr>
+								<td>Lemonade</td>
+								<td>$2</td>
+								<td>18</td>
+							</tr>
+							<tr>
+								<td>Bread</td>
+								<td>$3</td>
+								<td>2</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section>
+					<h2>Clever Quotes</h2>
+					<p>
+						These guys come in two forms, inline: <q cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">The nice thing about standards is that there are so many to choose from</q> and block:
+					</p>
+					<blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
+						&ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
+						reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
+					</blockquote>
+				</section>
+
+				<section>
+					<h2>Intergalactic Interconnections</h2>
+					<p>
+						You can link between slides internally,
+						<a href="#/2/3">like this</a>.
+					</p>
+				</section>
+
+				<section>
+					<h2>Speaker View</h2>
+					<p>There's a <a href="https://github.com/hakimel/reveal.js#speaker-notes">speaker view</a>. It includes a timer, preview of the upcoming slide as well as your speaker notes.</p>
+					<p>Press the <em>S</em> key to try it out.</p>
+
+					<aside class="notes">
+						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
+					</aside>
+				</section>
+
+				<section>
+					<h2>Export to PDF</h2>
+					<p>Presentations can be <a href="https://github.com/hakimel/reveal.js#pdf-export">exported to PDF</a>, here's an example:</p>
+					<iframe data-src="https://www.slideshare.net/slideshow/embed_code/42840540" width="445" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:3px solid #666; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+				</section>
+
+				<section>
+					<h2>Global State</h2>
+					<p>
+						Set <code>data-state="something"</code> on a slide and <code>"something"</code>
+						will be added as a class to the document element when the slide is open. This lets you
+						apply broader style changes, like switching the page background.
+					</p>
+				</section>
+
+				<section data-state="customevent">
+					<h2>State Events</h2>
+					<p>
+						Additionally custom events can be triggered on a per slide basis by binding to the <code>data-state</code> name.
+					</p>
+					<pre><code class="javascript" data-trim contenteditable style="font-size: 18px;">
+Reveal.addEventListener( 'customevent', function() {
+	console.log( '"customevent" has fired' );
+} );
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Take a Moment</h2>
+					<p>
+						Press B or . on your keyboard to pause the presentation. This is helpful when you're on stage and want to take distracting slides off the screen.
+					</p>
+				</section>
+
+				<section>
+					<h2>Much more</h2>
+					<ul>
+						<li>Right-to-left support</li>
+						<li><a href="https://github.com/hakimel/reveal.js#api">Extensive JavaScript API</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#auto-sliding">Auto-progression</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#parallax-background">Parallax backgrounds</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#keyboard-bindings">Custom keyboard bindings</a></li>
+					</ul>
+				</section>
+
+				<section style="text-align: left;">
+					<h1>THE END</h1>
+					<p>
+						- <a href="https://slides.com">Try the online editor</a> <br>
+						- <a href="https://github.com/hakimel/reveal.js">Source code &amp; documentation</a>
+					</p>
+				</section>
+
+				<section>
+					<div class="sl-block" data-block-type="text" style="width: 384px; left: 48px; top: 105px; height: auto;" data-block-id="2218893b04a6f3535eab8d4198afd9a4"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 10;"><h2>Title Text</h2></div></div>
+
+					<div class="sl-block" data-block-type="text" style="width: 384px; left: 48px; top: 210px; height: auto;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis." style="text-align: left; z-index: 11;"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis.</p></div></div>
+
+					<div class="sl-block" data-block-type="text" style="width: 384px; left: 528px; top: 105px; height: auto;" data-block-id="f4e1a01bc167f726508d52c538bba49c"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 12;">
+						<h2>Title Text</h2></div></div>
+
+					<div class="sl-block" data-block-type="text" style="width: 384px; left: 528px; top: 210px; height: auto;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis." style="text-align: right; z-index: 13;"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis.</p></div></div>
+				</section>
+
+				<section data-id="f96e96e128847966b771aa67cd655c6d"><div class="sl-block" data-block-type="video" style="min-width: 30px; min-height: 30px; width: 640px; height: 360px; left: 63px; top: 210px;" data-block-id="0e39d2c0748ac2d4e831fa199aa702b1"><div class="sl-block-content" style="z-index: 11;"><video playsinline="" controls="controls" data-paused-by-reveal=""></video></div></div></section>
+
+				<section><div style="width: 384px; left: 48px; top: 105px; height: auto;"><div style="text-align: left; z-index: 10;"><h2>Title Text</h2></div></div>
+				<div style="width: 384px; left: 48px; top: 210px; height: auto;"><div style="text-align: left; z-index: 11;"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis.</p></div></div>
+				<div style="width: 384px; left: 528px; top: 105px; height: auto;"><div style="text-align: left; z-index: 12;"><h2>Title Text</h2></div></div>
+				<div style="width: 384px; left: 528px; top: 210px; height: auto;"><div style="text-align: left; z-index: 13;"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin urna odio, aliquam vulputate faucibus id, elementum lobortis felis. Mauris urna dolor, placerat ac sagittis quis.</p></div></div></section>
+			</div>
+
+			<!-- <section data-id="b70d664c4677543da1fe5142c0bdefaa"><div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 380px; top: 250px;" data-block-id="7a9190fe023137edeae58b9c88e3be4d"><div class="sl-block-content fragment fade-right" data-line-x1="0" data-line-y1="200" data-line-x2="200" data-line-y2="0" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 10;" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="200" height="200" viewbox="0 0 200 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0" y1="200" x2="200" y2="0"></line><line stroke="#000000" stroke-width="2" x1="0" y1="200" x2="200" y2="0"></line></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 191px; top: 250px;" data-block-id="6afaa1f0f4c8f5c4d8d26c135fa8e221"><div class="sl-block-content fragment fade-left" data-line-x1="0" data-line-y1="200" data-line-x2="-189" data-line-y2="0" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 11;" data-fragment-index="4"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="189" height="200" viewbox="-189 0 189 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0" y1="200" x2="-189" y2="0"></line><line stroke="#000000" stroke-width="2" x1="0" y1="200" x2="-189" y2="0"></line></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 380px; top: 250px;" data-block-id="e64599de534241e3b2acb42636d8c557"><div class="sl-block-content fragment semi-fade-out" data-line-x1="0" data-line-y1="200" data-line-x2="200" data-line-y2="0" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 12;" data-fragment-index="6"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="200" height="200" viewbox="0 0 200 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0" y1="200" x2="200" y2="0"></line><line stroke="#000000" stroke-width="2" x1="0" y1="200" x2="200" y2="0"></line></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 380px; top: 250px;" data-block-id="2f69b93d760719e14eec141e0500fec2"><div class="sl-block-content fragment" data-line-x1="0" data-line-y1="200" data-line-x2="200" data-line-y2="0" data-line-color="#b6d7a8" data-line-start-type="arrow" data-line-end-type="circle" style="z-index: 13;" data-line-width="4px" href="" data-fragment-index="2"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="200" height="200" viewbox="0 0 200 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="4" y1="196" x2="196" y2="4"></line><line stroke="#b6d7a8" stroke-width="4" x1="4" y1="196" x2="196" y2="4"></line><polygon fill="#b6d7a8" transform="translate(4,196) rotate(45)" points="0,6 6,-6 -6,-6"></polygon><ellipse rx="6" ry="6" cx="196" cy="4" fill="#b6d7a8"></ellipse></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 395px; top: 265px;" data-block-id="505afdc1df88a1941919d3f28346931a"><div class="sl-block-content fragment fade-up" data-line-x1="0" data-line-y1="200" data-line-x2="200" data-line-y2="0" data-line-color="#b6d7a8" data-line-start-type="arrow" data-line-end-type="circle" style="z-index: 14;" data-line-width="4px" href="" data-fragment-index="3"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="200" height="200" viewbox="0 0 200 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="4" y1="196" x2="196" y2="4"></line><line stroke="#b6d7a8" stroke-width="4" x1="4" y1="196" x2="196" y2="4"></line><polygon fill="#b6d7a8" transform="translate(4,196) rotate(45)" points="0,6 6,-6 -6,-6"></polygon><ellipse rx="6" ry="6" cx="196" cy="4" fill="#b6d7a8"></ellipse></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 410px; top: 280px;" data-block-id="2772fdc6c3e6f635ced2ca8ef3c41671"><div class="sl-block-content fragment fade-down" data-line-x1="0" data-line-y1="200" data-line-x2="200" data-line-y2="0" data-line-color="#b6d7a8" data-line-start-type="arrow" data-line-end-type="circle" style="z-index: 15;" data-line-width="4px" href="" data-fragment-index="1"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="200" height="200" viewbox="0 0 200 200"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="4" y1="196" x2="196" y2="4"></line><line stroke="#b6d7a8" stroke-width="4" x1="4" y1="196" x2="196" y2="4"></line><polygon fill="#b6d7a8" transform="translate(4,196) rotate(45)" points="0,6 6,-6 -6,-6"></polygon><ellipse rx="6" ry="6" cx="196" cy="4" fill="#b6d7a8"></ellipse></svg></div></div>
+				<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 228px; top: 119px;" data-block-id="9e7e51083945e4ec7cee808457da6f48"><div class="sl-block-content fragment fade-in-then-semi-out" data-line-x1="300" data-line-y1="283" data-line-x2="200" data-line-y2="0" data-line-color="#b6d7a8" data-line-start-type="arrow" data-line-end-type="circle" style="z-index: 17;" data-line-width="4px" href="" data-fragment-index="0"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="100" height="283" viewbox="200 0 100 283"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="298" y1="277" x2="202" y2="6"></line><line stroke="#b6d7a8" stroke-width="4" x1="298" y1="277" x2="202" y2="6"></line><polygon fill="#b6d7a8" transform="translate(298,277) rotate(-19.461)" points="0,6 6,-6 -6,-6"></polygon><ellipse rx="6" ry="6" cx="202" cy="6" fill="#b6d7a8"></ellipse></svg></div></div></section> -->
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				viewDistance: 3,
+
+				// width: 1280,
+				// height: 720,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/search/search.js', async: true },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+
+					{ src: 'plugin/d3js/d3.v4.min.js' },
+					{ src: 'plugin/d3js/d3js.js' },
+
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,16 @@
+.node {
+  cursor: pointer; }
+
+.node rect {
+  fill: #333333;
+  stroke: #2f8e5a;
+  stroke-width: 1.5px; }
+
+.node text {
+  font: 10px "Fira Sans", "Source Sans Pro", sans-serif;
+  fill: #fff; }
+
+.link, .link-alone {
+  fill: none;
+  stroke: #2f8e5a;
+  stroke-width: 1.5px; }
