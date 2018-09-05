@@ -18,19 +18,6 @@
 
 		<link rel="stylesheet" href="css/reveal-custom.css">
 		<link rel="stylesheet" href="css/theme/black-custom.css" id="theme">
-		<!-- custom transitions, pre body header font -->
-
-		<!-- reveal.js make diagrams align to top without disablingn centering and enabling for every slide
-
-			also see: https://github.com/hakimel/reveal.js/issues/1262
-
-				if( config.top || slide.classList.contains( 'top' ) || slide.classList.contains( 'fig-container' ) ) {
-					slide.style.top = ''
-				}
-
-			increased code block height to 600px from 400px (black-custom.css)
-			.reveal pre code {}
-		 -->
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -256,7 +243,6 @@
 					data-file="assets/d3js/naive-graph.html">
 					</section>
 				</section>
-
 
 				<section>
 					<section data-background-transition="zoom" data-background="#21704b">
@@ -598,7 +584,7 @@
 
 					<section>
 						<ul style="font-size: 35px">
-							<li>Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob. <span class="fragment"><strong>Identical blobs are re-used by trees</strong>.</span></li>
+							<li>Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob. <span class="fragment"><strong>Identical blobs are re-used by trees.</strong></span></li>
 							<li>Level 2: <span class="emphasized">Trees</span> record the directory structure in a snapshot, of a collection of folders and file revisions.</li>
 							<li>Level 3: <span class="emphasized">Commits</span> point to trees, provide meta-data <span class="fragment"><strong>and can be chained to one another in order to form a history</strong>.</span></li>
 						</ul>
@@ -786,28 +772,6 @@
 
 				<section>
 					<section data-background-transition="zoom" data-background="#21704b">
-						<h1>A little something about graph properties</h1>
-					</section>
-
-					<section>
-						<h4>Advantages of a DAG</h4>
-						<ul>
-							<li>Only 1 copy of each file (better yet: its contents) is stored regardless of the number of snapshots. Blobs are re-used.</li>
-							<li>History can be rewound from any point in the graph.</li>
-							<li>Refs provide entrypoints through meaningful names (i.e. bookmarks).</li>
-						</ul>
-					</section>
-
-					<section style="font-size: 35px">
-						<h3>Git is also a <span class="emphasized">Merkle Graph</span></h3>
-						<p>The <span class="emphasized">SHA-1</span> hash names used for git objects provides an elegant way to verify the integrity of all the data in the repository.</p>
-						<p class="fragment">The hash of any one object depends on the hashes (and contents) of all the files that came before it. A similar technique is used by Bitcoin and BitTorrent. <span style="font-size: 25px">(But <a href="https://stackoverflow.com/questions/46192377/why-is-git-not-considered-a-block-chain">don't call git a blockchain</a> unless you want to anger some people.)</span></p>
-						<p class="fragment">This is also the reason why re-writing history can be dangerous in git. Everything downstream will be affected. <span style="font-size: 25px">(Although this generally only becomes a problem when working with collaborators.)</span></p>
-					</section>
-				</section>
-
-				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
 						<h1>Don't lose your <em>HEAD</em></h1>
 					</section>
 
@@ -867,6 +831,57 @@
 
 				<section>
 					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>Index or staging area</h1>
+					</section>
+					<section>
+						<p>We glossed over this earlier, but for the sake of completion.</p>
+						<br>
+						<h4>The index is the staging area in between the working directory and a commit.</h4>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/staging-area.png" alt="staging-area">
+						<p style="font-size: 20px">For a good write-up, see: <a href="https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git">https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git</a></p>
+					</section>
+					<section>
+						<p>Conceptually it's an ever-changing tree object stored as a single large binary file .git/index</p>
+						<p>It can be viewed via (see previous slides)</p>
+						<pre><code class="shell" data-trim contenteditable>
+							$  master 1  git ls-files --stage
+								100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
+								100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+						</code></pre>
+					</section>
+					<section>
+						<ul>
+							<li>Easy way to reset without reverting commits.</li>
+							<li>Allows splitting new changes into multiple commits.</li>
+							<li>Simplifies merging.</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
+						<h1>A little something about graph properties</h1>
+					</section>
+
+					<section>
+						<h4>Advantages of a DAG</h4>
+						<ul>
+							<li>Only 1 copy of each file (better yet: its contents) is stored regardless of the number of snapshots. Blobs are re-used.</li>
+							<li>History can be rewound from any point in the graph.</li>
+							<li>Refs provide entrypoints through meaningful names (i.e. bookmarks).</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px">
+						<h3>Git is also a <span class="emphasized">Merkle Graph</span></h3>
+						<p>The <span class="emphasized">SHA-1</span> hash names used for git objects provides an elegant way to verify the integrity of all the data in the repository.</p>
+						<p class="fragment">The hash of any one object depends on the hashes (and contents) of all the files that came before it. A similar technique is used by Bitcoin and BitTorrent. <span style="font-size: 25px">(But <a href="https://stackoverflow.com/questions/46192377/why-is-git-not-considered-a-block-chain">don't call git a blockchain</a> unless you want to anger some people.)</span></p>
+						<p class="fragment">This is also the reason why re-writing history can be dangerous in git. Everything downstream will be affected. <span style="font-size: 25px">(Although this generally only becomes a problem when working with collaborators.)</span></p>
+					</section>
+				</section>
+
+				<section>
+					<section data-background-transition="zoom" data-background="#21704b">
 							<h1>Merging branches</h1>
 					</section>
 					<section>
@@ -898,60 +913,44 @@
 					</section>
 				</section>
 
-				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
-						<h1>Index or staging area</h1>
-					</section>
-					<section>
-						<p>We glossed over this earlier, but for the sake of completion.</p>
-						<br>
-						<h4>The index is the staging area in between the working directory and a commit.</h4>
-						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/staging-area.png" alt="staging-area">
-						<p style="font-size: 20px">For a good write-up, see: <a href="https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git">https://stackoverflow.com/questions/25351450/what-does-adding-to-the-index-really-mean-in-git</a></p>
-					</section>
-					<section>
-						<p>Conceptually it's an ever-changing tree object stored as a single large binary file .git/index</p>
-						<p>It can be viewed via (see previous slides)</p>
-						<pre><code class="shell" data-trim contenteditable>
-							$  master 1  git ls-files --stage
-								100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
-								100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
-						</code></pre>
-					</section>
-					<section>
-						<ul>
-							<li>Easy way to reset without reverting commits.</li>
-							<li>Allows splitting new changes into multiple commits.</li>
-							<li>Simplifies merging.</li>
-						</ul>
-					</section>
-				</section>
-
-				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
-						<h1>Moving around the graph</h1>
-					</section>
-
-					<section>
-	https://stackoverflow.com/questions/673407/how-do-i-clear-my-local-working-directory-in-git
-	reset vs checkout
-	https://sethrobertson.github.io/GitFixUm/fixup.html#pushed_new_simple
-	https://stackoverflow.com/questions/5798930/git-rm-cached-x-vs-git-reset-head-x
-					</section>
-				</section>
-
 				<section data-background-transition="zoom" data-background="#21704b">
 					<h1>A few more useful tidbits</h1>
 				</section>
 
 				<section>
+					<!-- <section data-background-transition="zoom" data-background="#21704b">
+						<h1>Moving around the graph</h1>
+					</section> -->
 
-					<section>
-						<p>Pretty git graph in the CLI</p>
-						<pre><code>git log --oneline --abbrev-commit --all --graph --decorate --color</code></pre>
-						<p>See <a href="https://stackoverflow.com/questions/1838873/visualizing-branch-topology-in-git/34467298#34467298">this SO post</a> for even more elaborate options (hint: create an alias...).</p>
+					<section style="font-size: 30px" data-background="#dddddd">
+						<h4>Reset vs checkout</h4>
+
+						<ul>
+							<li>Reset moves the thing that HEAD is pointing to, i.e. the branch.</li>
+							<li>Checkout moves HEAD itself (and can lead to a detached HEAD).</li>
+						</ul>
+
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/reset-checkout.png" alt="reset-checkout">
+
+						<p style="font-size: 20px">Source: <a href="https://stackoverflow.com/a/3639387">https://stackoverflow.com/a/3639387</a></p>
+
+						<p style="font-size: 20px">More info: <a href="https://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified">https://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified</a></p>
 					</section>
 
+					<section>
+						<h4>Reset can do a few different things depending on the parameter you pass.</h4>
+						<pre><code class="shell" data-trim contenteditable>
+							git reset [&lt;mode&gt;] [&lt;commit&gt;]
+						</code></pre>
+						<ul>
+							<li><code>--soft</code>: leaves index and working dir untouched.</li>
+							<li><code>--mixed (default)</code>: resets index and leaves working dir untouched.</li>
+							<li><code>--hard</code>: resets index and working dir. One of the few ways do lose progress in git!</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
 					<section>
 						<!-- id="fragment" works but fragments messes things up -->
 						<h4>Local vs remote branches</h4>
@@ -1001,6 +1000,30 @@
 
 				<section>
 					<section>
+						<h4>Initial setup, managing SSL keys, creating your own remote repositories, etc.</h4>
+						<p>There's a bunch of stuff to know outside of regular usage. Fortunately, most of these things can be found in one of the many excellent resources online. The <a href="https://git-scm.com/book/en/v2">Pro Git book</a> is usually a good starting point.</p>
+					</section>
+					<section>
+						<h4>Pretty git graphs in the CLI</h4>
+						<br>
+						<pre><code class="shell" data-trim contenteditable>git log --oneline --abbrev-commit --all --graph --decorate --color</code></pre>
+						<p style="font-size: 20px">See <a href="https://stackoverflow.com/questions/1838873/visualizing-branch-topology-in-git/34467298#34467298">this SO post</a> for even more elaborate options (hint: create an alias...).</p>
+					</section>
+
+					<section>
+						<h4>Removing tracked files after updating <code>.gitignore</code></h4>
+						<p>Adding a file to the ignore file will prevent it from being added to the index, but what if it's already there?</p>
+						<pre><code class="shell" data-trim contenteditable>
+							git rm --cached &lt;file&gt;
+						</code></pre>
+						<p>or</p>
+						<pre><code class="shell" data-trim contenteditable>
+							git rm -r --cached .
+							git add -A
+						</code></pre>
+					</section>
+
+					<section>
 						<h3>Packfiles, garbage collection and deltas</h3>
 
 						<p>I mentioned that git doesn't store diffs, but every new file (based on its contents) is stored in its unique blob.</p>
@@ -1030,6 +1053,27 @@
 							<li><a href="https://youtu.be/ig5E8CcdM9g?t=1807">https://youtu.be/ig5E8CcdM9g?t=1807</a></li>
 							<li><a href="https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/6-a-commit-by-any-other-name.html">https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/6-a-commit-by-any-other-name.html</a></li>
 							<li><a href="https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection">https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection</a></li>
+						</ul>
+					</section>
+
+					<section>
+						<h4>Setting upstream branches</h4>
+						<pre><code class="shell" data-trim contenteditable>
+							git push -u origin test
+						</code></pre>
+						<p>Or equivalently</p>
+						<pre><code class="shell" data-trim contenteditable>
+							git push origin master; git branch --set-upstream master origin/master
+						</code></pre>
+						<p>Makes current branch track a remote one, i.e. allows pushing/pulling without specifying the remote ref name.</p>
+					</section>
+
+					<section>
+						Further aspects to explore:
+
+						<ul>
+							<li>Stashing: temporarily storing the changes in your working tree without needing to commit them. Allows you to move around the revision history.</li>
+							<li>Reverting: adding a new commit that "undoes" a previous one. Better than re-writing history in many cases (e.g. collaborators).</li>
 						</ul>
 					</section>
 
@@ -1128,11 +1172,6 @@
 				</section>
 
 				<section>
-					<h4>Initial setup, managing SSL keys, creating your own remote repositories, etc.</h4>
-					<p>There's a bunch of stuff to know outside of regular usage. Fortunately, most of these things can be found in one of the many excellent resources online. The <a href="https://git-scm.com/book/en/v2">Pro Git book</a> is usually a good starting point.</p>
-				</section>
-
-				<section>
 					<h3>That's all folks!</h3>
 
 					<p>This should set you up to make your git experience smooth <strike>sailing</strike> cruising from here on out.</p>
@@ -1148,11 +1187,13 @@
 
 					<section>
 						<h3>Challenges</h3>
-						<ol style="font-size: 30px">
+						<ol style="font-size: 20px">
 							<li>Create a simple "Hello World" repository with a few commits and/or branches, keeping an eye on the <code>.git/objects</code> directory as you do so and using the <code>git cat-file -p/t</code> commands to inspect new objects.</li>
 							<li>What would happen if you delete the <code>.git/index</code> file after staging content? Think about it, then try it!</li>
 							<li>Does a <code>git commit --amend</code> change the name (i.e. SHA-1 digest) of the commit that is updated? Think about it, then try it! <span style="font-size: 25px">Read up on the amend command <a href="https://www.atlassian.com/git/tutorials/rewriting-history">here</a> if you're not familiar with this command.</span></li>
 							<li>Create a copy of your repository and append a single character to 1 of the objects in .git/objects. Use <code>git status</code> and <git>git fsck</git> to see how git deals with the damage you've caused.</li>
+							<li>Use <code>git checkout</code> on a commit's hash directly (instead of on a ref). What will happen if you create a new commit here? Inspect the graph and try to find a route that can reach this new commit. Look up the <code>git prune</code> command.</li>
+							<li>Suppose that, after committing a few times, we modify an existing file, add it to the index and then modify it again. What will happen when we try to checkout a different branch? Think about how the working tree, index and commit you're trying to checkout differ. You can look up the answer in "Git from the inside out".</li>
 						</ol>
 					</section>
 
@@ -1166,35 +1207,21 @@
 					</section>
 				</section>
 
-				<section>
-						Emphasize direction of arrows/point back in time
-						Emphasize that commits can have multiple parents
-	
+				<!-- <section>
 						merge rebase https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/7-branching-and-the-power-of-rebase.html
 						fast forward
-	
-						https://codewords.recurse.com/issues/two/git-from-the-inside-out
-						checkout will be prevented if working copy/current commit/checkingout commit differ
-	
+
 						merging ff https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
-	
+
 						tags + remote refs (add to refs section or useful tidbits)
 						https://git-scm.com/book/en/v2/Git-Internals-Git-References
-	
+
 						git diff
 						git stash
 						.gitignore
-	
+
 						checkout/clean/revert
-	
-						git pretty graph
-				</section>
-				<section>
-						- stash and pop
 
-						- detached head
-
-						- remove local/remote branch: https://stackoverflow.com/questions/2003505/how-do-i-delete-a-git-branch-both-locally-and-remotely
 
 						- upstream: https://stackoverflow.com/questions/5697750/what-exactly-does-the-u-do-git-push-u-origin-master-vs-git-push-origin-ma
 						- .gitignore use it! + global!
@@ -1264,18 +1291,10 @@
 					- comparing files in branches
 					- undoing a merge
 
-				</section>
-
-				<section>
-						https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
-						content addressable file system
-				</section>
-
-				<section>
 					https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
 
 					low-level commands: manipulate and inspect objects in git
-				</section>
+				</section> -->
 
 		</div>
 
