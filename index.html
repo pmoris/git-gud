@@ -426,7 +426,7 @@
 							<video data-autoplay class="contain" data-src="assets/media/tree.webm"></video>
 					</section> -->
 
-					<section>
+					<section style="font-size: 40px">
 						<h4>Tree objects record the directory structure.</h4>
 
 						<pre><code class="shell" data-trim contenteditable>
@@ -447,8 +447,21 @@
 							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
 						</code></pre>
 
+						<p>
+							Two new files showed up after committing: 35eaf2c and fab9dd2. The first of these is a so-called tree object.
+						</p>
+					</section>
+
+					<section>
+						<h4>Tree objects record the directory structure.</h4>
+
+						<pre><code class="shell" data-trim contenteditable>
+							$ git cat-file -p 35eaf2c
+							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
+						</code></pre>
+
 						<ul style="font-size: 30px">
-							<li>Object in <code>.git/objects</code> with SHA-1-derived name.</li>
+							<li>Object stored in <code>.git/objects</code> with SHA-1-derived name.</li>
 							<li>Contents: 1 line with associated mode, type, filename and SHA-1 hash per target node => this is enough to restore any file.</li>
 							<li>DAG-view: nodes that point to blobs or other trees (i.e. sub-directories).</li>
 							<li>Trees are created from the current state of the <span class="emphasized">index</span> (more on that later).</li>
