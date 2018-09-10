@@ -56,8 +56,8 @@
 
 				<section>
 
-					<section>
-						All in all, git is pretty
+					<section data-menu-title="Git frustrations">
+						<p>All in all, git is pretty</p>
 						<div class="sl-block" data-block-type="text">
 							<div class="sl-block-content" style="transition-duration: 2s; transition-delay: 1s;" data-animation-type="slide-left">
 								<h1 style="font-family:cursive;"><span class="rainbow">amazing!</span></h1>
@@ -77,8 +77,17 @@
 					</section>
 
 					<section>
-							<h1>Keep calm</h1>
-							<br>and
+							<p style="margin: 0 0 20px 0;
+							font-family: 'Fira Sans Light', 'Source Sans Pro', Helvetica, sans-serif;
+							font-weight: 600;
+							line-height: 1.2;
+							letter-spacing: normal;
+							text-transform: uppercase;
+							text-shadow: none;
+							word-wrap: break-word;
+							font-size: 2em;">
+							Keep calm</p>
+							<p>and</p>
 							<!-- <span class="fragment">and</span> -->
 					</section>
 
@@ -86,7 +95,17 @@
 						<audio data-autoplay src="assets/media/you-died.mp3"></audio>
 						<div class="sl-block" data-block-type="text">
 							<div class="sl-block-content" style="transition-duration: 2.5s; transition-delay: 0.2s;" data-animation-type="fade-in">
-								<h1 style="font-weight: 400; font-family:ds-font; color:#974551">git gud</h1>
+								<p style="margin: 0 0 20px 0;
+									font-weight: 600;
+									line-height: 1.2;
+									letter-spacing: normal;
+									text-transform: uppercase;
+									text-shadow: none;
+									word-wrap: break-word;
+									font-size: 2em;
+									font-weight: 400;
+									font-family:ds-font;
+									color:#974551">git gud</p>
 							</div>
 						</div>
 					</section>
@@ -98,7 +117,7 @@
 						</section>
 					</section> -->
 
-					<section data-markdown>
+					<section data-markdown data-menu-title="Goals of this talk">
 							<script type="text/template">
 								### Goals
 								- Reveal the nuts and bolts that make `git` tick, so that you will feel less intimidated during day-to-day use.
@@ -107,7 +126,7 @@
 							</script>
 					</section>
 
-					<section>
+					<section data-markdown data-menu-title="Resources and links">
 						<h5>DISCLAIMER</h5>
 						<h6>Resources created by people more knowledgeable and witty than I</h6>
 
@@ -262,7 +281,7 @@
 				</section>
 
 				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
+					<section data-background-transition="zoom" data-background="#21704b" data-menu-title="SHA-1">
 							<h1>two, three,</h1>
 							<h1>cha, cha, SHA-1?</h1>
 					</section>
@@ -294,7 +313,7 @@
 				</section>
 
 				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
+					<section data-background-transition="zoom" data-background="#21704b" data-menu-title="Git objects: blobs">
 							<h1>Git objects</h1>
 							<h2>Blobs 🍮</h2>
 					</section>
@@ -406,7 +425,7 @@
 				</section>
 
 				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
+					<section data-background-transition="zoom" data-background="#21704b" data-menu-title="Git objects: trees">
 							<h1>Git objects</h1>
 							<h2>Trees 🌳</h2>
 					</section>
@@ -480,7 +499,7 @@
 				</section>
 
 				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
+					<section data-background-transition="zoom" data-background="#21704b" data-menu-title="Git objects: commits">
 						<h1>Git objects</h1>
 						<h2>Commits 💾</h2>
 					</section>
@@ -537,7 +556,7 @@
 						</ul>
 					</section>
 
-					<section style="font-size: 35px">
+					<section style="font-size: 35px" data-menu-title="Committing via git plumbing commands">
 						<h5>Do you recall that <span class="emphasized">cat blob</span> we created manually?</h5>
 						<p>It's possible, using only <emp>git plumbing commands</emp>, to create a tree object that references it.</p>
 						<p>It's also possible to manually create a commit object that points to this tree and to notify our repo that this commit exists in our branch to make it reachable.</p>
@@ -935,7 +954,7 @@
 						<h1>Moving around the graph</h1>
 					</section> -->
 
-					<section style="font-size: 30px" data-background="#dddddd">
+					<section style="font-size: 30px" data-background="#dddddd" data-menu-title="Reset vs checkout">
 						<h4>Reset vs checkout</h4>
 
 						<ul>
@@ -964,7 +983,7 @@
 				</section>
 
 				<section>
-					<section>
+					<section data-menu-title="Local vs remote branches">
 						<!-- id="fragment" works but fragments messes things up -->
 						<h4>Local vs remote branches</h4>
 						<p style="font-size: 35px">A common point of confusion is the relation between local and remote branches.</p>
@@ -1012,18 +1031,19 @@
 				</section>
 
 				<section>
-					<section>
+					<section data-menu-title="Git setup and config">
 						<h4>Initial setup, managing SSL keys, creating your own remote repositories, etc.</h4>
 						<p>There's a bunch of stuff to know outside of regular usage. Fortunately, most of these things can be found in one of the many excellent resources online. The <a href="https://git-scm.com/book/en/v2">Pro Git book</a> is usually a good starting point.</p>
 					</section>
-					<section>
+
+					<section data-menu-title="Pretty graphs in the CLI">
 						<h4>Pretty git graphs in the CLI</h4>
 						<br>
 						<pre><code class="shell" data-trim contenteditable>git log --oneline --abbrev-commit --all --graph --decorate --color</code></pre>
 						<p style="font-size: 20px">See <a href="https://stackoverflow.com/questions/1838873/visualizing-branch-topology-in-git/34467298#34467298">this SO post</a> for even more elaborate options (hint: create an alias...).</p>
 					</section>
 
-					<section>
+					<section data-menu-title="Removing files after updating .gitignore">
 						<h4>Removing tracked files after updating <code>.gitignore</code></h4>
 						<p>Adding a file to the ignore file will prevent it from being added to the index, but what if it's already there?</p>
 						<pre><code class="shell" data-trim contenteditable>
@@ -1036,7 +1056,7 @@
 						</code></pre>
 					</section>
 
-					<section>
+					<section data-menu-title="Packfiles, garbage collection and deltas">
 						<h3>Packfiles, garbage collection and deltas</h3>
 
 						<p>I mentioned that git doesn't store diffs, but every new file (based on its contents) is stored in its unique blob.</p>
@@ -1048,7 +1068,7 @@
 						<p style="font-size: 20px">More info: <a href="	https://git-scm.com/book/en/v2/Git-Internals-Packfiles">https://git-scm.com/book/en/v2/Git-Internals-Packfiles</a></p>
 					</section>
 
-					<section>
+					<section data-menu-title="Revision names">
 						<h3>Revision names and syntax</h3>
 						<h5>Tree-ish and commit-ish</h5>
 
@@ -1069,7 +1089,7 @@
 						</ul>
 					</section>
 
-					<section>
+					<section data-menu-title="What does upstream mean?">
 						<h4>Setting upstream branches</h4>
 						<pre><code class="shell" data-trim contenteditable>
 							git push -u origin test
@@ -1081,7 +1101,7 @@
 						<p>Makes current branch track a remote one, i.e. allows pushing/pulling without specifying the remote ref name.</p>
 					</section>
 
-					<section>
+					<section data-menu-title="Stashing">
 						Further aspects to explore:
 
 						<ul>
@@ -1093,7 +1113,7 @@
 				</section>
 
 				<section>
-					<section data-background-transition="zoom" data-background="#21704b">
+					<section data-background-transition="zoom" data-background="#21704b" data-menu-title="Removing sensitive data from a repository">
 						<h4>So you accidentally commited sensitive data to your repo...</h4>
 					</section>
 
@@ -1184,7 +1204,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section data-menu-title="End">
 					<h3>That's all folks!</h3>
 
 					<p>This should set you up to make your git experience smooth <strike>sailing</strike> cruising from here on out.</p>
@@ -1193,7 +1213,7 @@
 				</section>
 
 				<section>
-					<section>
+					<section data-menu-title="Challenges">
 						<h3>Challenges</h3>
 						<p>Have a look at this excellent interactive visualisation to reinforce some of the concepts we've gone over: <a href="https://onlywei.github.io/explain-git-with-d3/">https://onlywei.github.io/explain-git-with-d3/</a></p>
 					</section>
@@ -1343,7 +1363,16 @@
 					{ src: 'plugin/d3js/d3.v4.min.js' },
 					{ src: 'plugin/d3js/d3js.js' },
 
-				]
+					// { src: 'plugin/toolbar/toolbar.js' },
+
+					{ src: 'plugin/menu/menu.js' }
+
+				],
+
+				menu: {
+					titleSelector: 'h1',
+					hideMissingTitles: true
+				}
 			});
 
 		</script>
