@@ -1,0 +1,12 @@
+
+custom transitions, pre body header font
+
+make diagrams align to top without disabling centring and enabling for every slide
+also see: https://github.com/hakimel/reveal.js/issues/1262
+    in reveal.js:
+    if( config.top || slide.classList.contains( 'top' ) || slide.classList.contains( 'fig-container' ) ) {
+        slide.style.top = ''
+    }
+
+increased code block height to 600px from 400px (black-custom.css)
+    .reveal pre code {}
