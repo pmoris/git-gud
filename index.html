@@ -124,7 +124,7 @@
 								### Goals
 								- Reveal the nuts and bolts that make `git` tick, so that you will feel less intimidated during day-to-day use.
 								- Make you reassess that XKCD-mindset.
-								- Provide you with adequate background knowledge & tools, so that you can explore and digest `git` documentation on your own.
+								- Provide adequate background knowledge & tools, so that you can explore and digest `git` documentation on your own.
 							</script>
 					</section>
 
@@ -132,17 +132,23 @@
 						<h5>DISCLAIMER</h5>
 						<h6>Resources created by people more knowledgeable and witty than I</h6>
 
-						<ul style="font-size:20px">
-							<li>Git from the Bottom Up: <a href=https://jwiegley.github.io/git-from-the-bottom-up/>https://jwiegley.github.io/git-from-the-bottom-up/</a></li>
-							<li>Git from the inside out: <a href=https://maryrosecook.com/blog/post/git-from-the-inside-out>https://maryrosecook.com/blog/post/git-from-the-inside-out</a></li>
-							<li>How Git Works - Fear Not The SHA! (gitlab): <a href=https://youtu.be/P6jD966jzlk>https://youtu.be/P6jD966jzlk</a></li>
-							<li>OSCON 2016: Dissecting Git's Guts - Git Internals - Emily Xie: <a href=https://youtu.be/YUCwr1Y6bFI>https://youtu.be/YUCwr1Y6bFI</a></li>
-							<li>Advanced Git: Graphs, Hashes, and Compression, Oh My!: <a href=https://youtu.be/ig5E8CcdM9g>https://youtu.be/ig5E8CcdM9g</a></li>
-							<li>The Pro Git book: <a href=https://git-scm.com/book/en/v2>https://git-scm.com/book/en/v2</a></li>
-							<li>Visualizing Git Concepts with D3 (a brilliant resource to get a feel for what different commands actually do!) <a href=https://onlywei.github.io/explain-git-with-d3/>https://onlywei.github.io/explain-git-with-d3/</a></li>
-							<li>Visualizing Git’s Merkle DAG with D3.js: <a href=https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/>https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/</a></li>
-							<li>Git for Computer Scientists: <a href=http://eagain.net/articles/git-for-computer-scientists/>http://eagain.net/articles/git-for-computer-scientists/</a></li>
-							<li>Git is a Directed Acyclic Graph and What the Heck Does That Mean?: <a href=https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059>https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059</a></li>
+						<ul style="font-size:18px">
+							<li>The Pro Git book, contains everything and more: <a href=https://git-scm.com/book/en/v2>https://git-scm.com/book/en/v2</a></li>
+							<li>A visual <bold>reference</bold> guide for most situations in git: <a href="https://marklodato.github.io/visual-git-guide/index-en.html">https://marklodato.github.io/visual-git-guide/index-en.html</a></li>
+							<li>For those who prefer audio over text:<ul>
+								<li>Git from the Bottom Up: <a href=https://jwiegley.github.io/git-from-the-bottom-up/>https://jwiegley.github.io/git-from-the-bottom-up/</a></li>
+								<li>Git from the inside out: <a href=https://maryrosecook.com/blog/post/git-from-the-inside-out>https://maryrosecook.com/blog/post/git-from-the-inside-out</a></li>
+								<li>How Git Works - Fear Not The SHA! (gitlab): <a href=https://youtu.be/P6jD966jzlk>https://youtu.be/P6jD966jzlk</a></li>
+								<li>OSCON 2016: Dissecting Git's Guts - Git Internals - Emily Xie: <a href=https://youtu.be/YUCwr1Y6bFI>https://youtu.be/YUCwr1Y6bFI</a></li>
+								<li>Advanced Git: Graphs, Hashes, and Compression, Oh My!: <a href=https://youtu.be/ig5E8CcdM9g>https://youtu.be/ig5E8CcdM9g</a></li>
+							</ul></li>
+							<li>Visualisations and thinking with graphs:<ul>
+								<li>A highly recommended guide for the perplexed (advanced beginners): <a href="http://think-like-a-git.net/">http://think-like-a-git.net/</a></li>
+								<li>Visualizing Git Concepts with D3 (a brilliant resource to get a feel for what different commands actually do!) <a href=https://onlywei.github.io/explain-git-with-d3/>https://onlywei.github.io/explain-git-with-d3/</a></li>
+								<li>Visualizing Git’s Merkle DAG with D3.js: <a href=https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/>https://tylercipriani.com/blog/2016/03/21/Visualizing-Git-Merkle-DAG-with-D3.js/</a></li>
+								<li>Git for Computer Scientists: <a href=http://eagain.net/articles/git-for-computer-scientists/>http://eagain.net/articles/git-for-computer-scientists/</a></li>
+								<li>Git is a Directed Acyclic Graph and What the Heck Does That Mean?: <a href=https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059>https://medium.com/girl-writes-code/git-is-a-directed-acyclic-graph-and-what-the-heck-does-that-mean-b6c8dec65059</a></li>
+							</ul></li>
 						</ul>
 
 						<p><small>Anytime you experience an insightful "AHA!"-moment, you should probably be praising these people, rather than me. Idem ditto whenever you chuckle.</small></p>
@@ -157,6 +163,16 @@
 					<section>
 						<p>TL;DR</p>
 						<p><a href="https://rogerdudler.github.io/git-guide/">https://rogerdudler.github.io/git-guide/</a></p>
+					</section>
+
+					<section data-menu-title="Git beginner guides">
+						<h6>A few more resources for the absolute beginner</h6>
+
+						<ul style="font-size:25px">
+							<li>The Pro Git book chapter 1-3: <a href=https://git-scm.com/book/en/v2>https://git-scm.com/book/en/v2</a></li>
+							<li>A 10 minute read by GitHub: <a href=https://guides.github.com/introduction/git-handbook/>https://guides.github.com/introduction/git-handbook/</a></li>
+							<li>A very nice and accessible collection of topics by Atlassian (GitBucket): <a href=https://www.atlassian.com/git/tutorials/setting-up-a-repository>https://www.atlassian.com/git/tutorials/setting-up-a-repository</a></li>
+						</ul>
 					</section>
 
 					<section>
@@ -1226,7 +1242,13 @@
 				<section>
 					<section data-menu-title="Challenges">
 						<h3>Challenges</h3>
-						<p>Have a look at this excellent interactive visualisation to reinforce some of the concepts we've gone over: <a href="https://onlywei.github.io/explain-git-with-d3/">https://onlywei.github.io/explain-git-with-d3/</a></p>
+						<p>Have a look at this excellent interactive visualisation to reinforce some of the concepts we've gone over: <a href="https://onlywei.github.io/explain-git-with-d3/">https://onlywei.github.io/explain-git-with-d3/</a>.</p>
+					</section>
+
+
+					<section data-menu-title="Challenges">
+						<h3>Challenges</h3>
+						<p>GitHub also created an interactive learning and visualisation environment with challenges per topic: <a href="https://learngitbranching.js.org/">https://learngitbranching.js.org/</a>.</p>
 					</section>
 
 					<section>
@@ -1375,7 +1397,6 @@
 					{ src: 'plugin/d3js/d3js.js' },
 
 					// { src: 'plugin/toolbar/toolbar.js' },
-
 					{ src: 'plugin/menu/menu.js' }
 
 				],
@@ -1384,6 +1405,42 @@
 					titleSelector: 'h1',
 					hideMissingTitles: true
 				}
+
+				// toolbar: {
+				// 	// Specifies where the toolbar will be shown: 'top' or 'bottom'
+				// 	position: 'bottom',
+
+				// 	// Add button to toggle fullscreen mode for the presentation
+				// 	fullscreen: false,
+
+				// 	// Add button to toggle the overview mode on and off
+				// 	overview: false,
+
+				// 	// Add button to pause (hide) the presentation display
+				// 	pause: false,
+
+				// 	// Add button to show the speaker notes
+				// 	notes: false,
+
+				// 	// Add button to show the help overlay
+				// 	help: false,
+
+				// 	// If true, the reveal.js-menu will be moved into the toolbar.
+				// 	// Set to false to leave the menu on its own.
+				// 	captureMenu: true,
+
+				// 	// If true, the playback control will be moved into the toolbar.
+				// 	// This is only relevant if the presentation is configured to autoSlide.
+				// 	// Set to false to leave the menu on its own.
+				// 	capturePlaybackControl: true,
+
+				// 	// By default the menu will load it's own font-awesome library
+				// 	// icons. If your presentation needs to load a different
+				// 	// font-awesome library the 'loadIcons' option can be set to false
+				// 	// and the menu will not attempt to load the font-awesome library.
+				// 	loadIcons: true
+				// }
+
 			});
 
 		</script>
