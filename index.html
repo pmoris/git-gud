@@ -402,7 +402,7 @@
 
 						<p class="fragment">Every text file with the contents "woof" that you'll ever create in your project (or any other projects) will point to the <span class="emphasized"><em>same blob</em></span>.</p>
 
-						<p class="fragment">Any file with the same content will, even if they have different names. This makes git's storage more efficient. <span style="font-size:30px">But more on that later.</span></p>
+						<p class="fragment">This is part of what makes git's storage method so efficient. <a href="#storage"><span style="font-size:30px; color:white">But more on that later.</span></a></p>
 
 					</section>
 
@@ -1061,7 +1061,7 @@
 						</code></pre>
 					</section>
 
-					<section data-menu-title="Packfiles, garbage collection and deltas">
+					<section id="storage" data-menu-title="Packfiles, garbage collection and deltas">
 						<h3>Packfiles, garbage collection and deltas</h3>
 
 						<p>I mentioned that git doesn't store diffs, but every new file (based on its contents) is stored in its unique blob.</p>
