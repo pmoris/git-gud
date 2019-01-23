@@ -126,6 +126,11 @@
 								- Make you reassess that XKCD-mindset.
 								- Provide adequate background knowledge & tools, so that you can explore and digest `git` documentation on your own.
 							</script>
+							<aside class="notes">
+								too much jargon
+								difficulty to solve problems
+								common operations hidden by GUIs despite good intentions
+							</aside>
 					</section>
 
 					<section data-menu-title="Resources and links">
@@ -191,16 +196,20 @@
 						<p style="font-size: 20px">Source: <a href="https://jwiegley.github.io/git-from-the-bottom-up/">https://jwiegley.github.io/git-from-the-bottom-up/</a></p>
 					</section>
 
-					<section data-markdown>
-						<script type="text/template">
-							<!-- .slide: style="font-size: 35px" -->
-							### Distributed version control system
+					<section>
+						<h4>git</h4>
+						<h4>=</h4>
+						<h4>distributed version control system</h4>
 
-							* _Snapshots_<!-- .element: class="emphasized" -->: keep track of previous versions of files (no more `FINAL_final_revised_project3.code` files cluttering up your folders).
-							* _Distributed_<!-- .element: class="emphasized" -->: mirror your project (and its history) on different machines.
-								* There can be many remote repositories, GitHub is just one example.
-								* Also allows you to work offline.
-						</script>
+						<ul style="font-size: 35px">
+							<li class="fragment"><span style="font-style: italic">Snapshots</span>: keep track of previous versions of files <span style="font-size: 25px">(no more FINAL_final_revised_project3.code files cluttering up your folders)</span>.</li>
+							<li class="fragment"><span style="font-style: italic">Distributed</span>: mirror your project (and its history) on different machines.
+							<ul style="font-size: 25px">
+								<li>There can be many remote repositories, <code>GitHub</code> is just one example.</li>
+								<li>Allows you to work offline.</li>
+							</ul></li>
+
+						</ul>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
@@ -219,7 +228,7 @@
 					<section>
 						<p>The following commands are referred to as <br><span class="emphasized">git porcelain</span> commands;<br>the ones the user normally interacts with.</p>
 						<br>
-						<p>Later on, we'll encounter the so-called <br><span class="emphasized">git plumbing commands</span>;<br>low-level commands to manipulate and inspect objects.</p>
+						<p>Later on, we'll encounter the so-called <br><span class="emphasized">git plumbing</span> commands;<br>low-level commands to manipulate and inspect objects.</p>
 					</section>
 
 					<section data-markdown>
@@ -237,18 +246,34 @@
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Changes
+							## Tracking changes
 
 							![](assets/img/add-commit.png)<!-- .element height="30%" width="30%" -->
 
-							Source:<!-- .element: style="font-size: 15px" --> https://git-scm.com/about/staging-area<!-- .element: style="font-size: 15px" -->
+							Source:<!-- .element: style="font-size: 20px" --> https://git-scm.com/about/staging-area<!-- .element: style="font-size: 20px" -->
+						</script>
+						<aside class="notes">
+							Do some work followed by a snapshot or backup
+							two steps:
+								- stage or mark changes
+								- finalise them
+						</aside>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							## Branches
 
 							![](assets/img/branches.png) <!-- .element height="50%" width="50%" -->
 
-							Source:<!-- .element: style="font-size: 15px" --> https://rogerdudler.github.io/git-guide/<!-- .element: style="font-size: 15px" -->
-
+							Source:<!-- .element: style="font-size: 20px" --> https://rogerdudler.github.io/git-guide/<!-- .element: style="font-size: 20px" -->
 						</script>
+						<aside class="notes">
+							branches allow you to work on a separate feature without affecting the original copy
+							changes made at different points in time can be merged and reconciled
+						</aside>
 					</section>
+
 					<section data-markdown>
 						<script type="text/template">
 							## Sharing
@@ -261,11 +286,15 @@
 							# retrieving changes
 							git pull # or fetch and merge
 							```
-
 						</script>
+						<aside class="notes">
+							different repositories that can be synchronised
+							either online or even to an external hard drive
+						</aside>
 					</section>
 
-					<section data-background="#dddddd">
+					<!-- <section data-background="#dddddd"> -->
+					<section>
 						<img style="border: 0;" height="50%" data-src="assets/img/git-transport.png" alt="they-said">
 						<p style="font-size: 20px">Source: <a href="https://blog.osteele.com/2008/05/my-git-workflow/">https://blog.osteele.com/2008/05/my-git-workflow/</a></p>
 					</section>
@@ -275,7 +304,11 @@
 
 						<h4 style="color:#2f8e5a;">Directed Acyclic Graph (DAG)</h4>
 
-						<p>But what are the nodes and edges of this graph? And how does it track files?</p>
+						</br>
+
+						<p>But what are the nodes and edges of this graph?</p>
+
+						<p>And how does it track files?</p>
 					</section>
 
 					<section class="fig-container"
@@ -290,10 +323,17 @@
 					</section>
 
 					<section data-background-video="assets/media/creation2.webm" data-background-size="contain" data-background-video-muted="true" data-background-color="#000000">
+						<aside class="notes">
+							.git directory is what defines a repository
+							created by init
+							bunch of files, mostly configuration
+							objects dir is where the magic happens
+							staged files are referened here
+						</aside>
 					</section>
 
 					<section>
-						<p>That file named <pre><code class="shell">cf/bc74af89ccf0d0ddbe488b4a2df7318786759d</code></pre> is what git refers to as a <span class="emphasized">blob</span>.</p>
+						<p>That file in <pre><code class="shell">cf/bc74af89ccf0d0ddbe488b4a2df7318786759d</code></pre> is what git refers to as a <span class="emphasized">blob</span>.</p>
 						<br>
 						<p>Blobs are created when you <code>git add</code> files. They're the most basic building block of git.</p>
 						<br>
@@ -310,16 +350,20 @@
 					<section>
 						<h5>Git is a content-addressable filesystem</h5>
 
+						</br>
+
+						<span class="fragment">
 						<p>Any kind of content you insert into the repository can be retrieved using a unique key or fingerprint</p>
 
 						<p>That key is a <span class="emphasized">SHA-1</span> checksum of the contents of the file <span style="font-size: 30px">(and a short header)</span>.</p>
 
 						<p>You've probably encountered these before as the names of your commits.</p>
+						</span>
 					</section>
 
 					<section data-markdown>
 						<script type="text/template">
-							SHA-1 is a cryptographic hash function.
+							#### SHA-1 is a cryptographic hash function.
 
 							Given an input, it provides an output of a fixed size (a hash).
 
@@ -340,23 +384,23 @@
 					</section>
 
 					<section>
-						<h4>So what did <code>"git add dog"</code> achieve?</h4>
+						<h4>So what did <code style="font-weight: normal">git add dog</code> achieve?</h4>
 						<br>
 						<ul>
-							<li>Creates a new <span class="emphasized">blob</span> file in <code>.git/objects/</code>.</li>
-							<li>Gives it a unique name by hashing the file content (and a header).</li>
-							<li>The first two characters of the 40 char <span class="emphasized">SHA-1</span> digest forms a sub-directory.</li>
-							<li>The rest forms the file name.</li>
+							<li>New <span class="emphasized">blob</span> file in <code>.git/objects/</code>.</li>
+							<li>Uniquely named by hashing the file content (and a header).</li>
+							<li>The first two characters of the 40 character <span class="emphasized">SHA-1</span> digest form a sub-directory.</li>
+							<li>Remainder forms the file name.</li>
 						</ul>
 					</section>
 
-					<section data-markdown>
+					<!-- <section data-markdown>
 						<script type="text/template">
 							#### Blobs and plumbing commands
 
 							Git provides us with a bunch of tools to inspect and even create blobs ourselves.
 
-							```
+							```{python}
 							$ tree .git/objects
 							.git/objects/
 							├── cf
@@ -375,6 +419,28 @@
 							(stdin)= cfbc74af89ccf0d0ddbe488b4a2df7318786759d
 							```
 						</script>
+					</section> -->
+
+					<section>
+						<h4>Git provides us with a bunch of plumbing commands to inspect and even create blobs ourselves.</h4>
+						<pre><code style="font-size:25px" class="python" data-trim contenteditable>
+							$ tree .git/objects
+							.git/objects/
+							├── cf
+							│   └── bc74af89ccf0d0ddbe488b4a2df7318786759d
+							├── info
+							└── pack
+
+							$ git hash-object dog
+							cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+
+							$ # file contents (and size) produce the hash
+							$ echo "woof" | git hash-object --stdin
+							cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+
+							$ printf "blob 5\000woof\n" | openssl sha1
+							(stdin)= cfbc74af89ccf0d0ddbe488b4a2df7318786759d
+						</code></pre>
 					</section>
 
 					<section>
@@ -459,10 +525,12 @@
 
 					<section>
 						<p>One of the biggest hurdles to wrapping your head around git, is all of its jargon.</p>
-
+					</br>
+						<span class="fragment">
 						<p>Whenever you see the term <span class="emphasized"><em>tree</em></span>, just think <span class="emphasized"><em>directory</em></span>.</p>
 
 						<span style="font-size: 20px">Note: you might see some people refer to the git graph as a tree as well.</span>
+						</span>
 					</section>
 
 					<section data-background-video="assets/media/tree.webm" data-background-size="contain" data-background-video-muted="true" data-background-color="#000000">
@@ -475,7 +543,7 @@
 					<section style="font-size: 40px">
 						<h4>Tree objects record the directory structure.</h4>
 
-						<pre><code class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 23px" class="shell" data-trim contenteditable>
 							$ tree .git/objects
 							.git/objects
 							├── 35
@@ -493,7 +561,7 @@
 							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
 						</code></pre>
 
-						<p>
+						<p style="font-size: 35px">
 							Two new files showed up after committing: 35eaf2c and fab9dd2. The first of these is a so-called tree object.
 						</p>
 					</section>
@@ -501,17 +569,17 @@
 					<section>
 						<h4>Tree objects record the directory structure.</h4>
 
-						<pre><code class="shell" data-trim contenteditable>
+						<pre style="width: 100%"><code style="font-size: 25px" class="shell" data-trim contenteditable>
 							$ git cat-file -p 35eaf2c
 							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
 						</code></pre>
 
 						<ul style="font-size: 30px">
 							<li>Object stored in <code>.git/objects</code> with SHA-1-derived name.</li>
-							<li>Contents: 1 line with associated mode, type, filename and SHA-1 hash per target node => this is enough to restore any file.</li>
+							<li>Contents: 1 line with associated mode, type, filename and SHA-1 hash per target node => <em>this is enough to restore any file</em>.</li>
 							<li>DAG-view: nodes that point to blobs or other trees (i.e. sub-directories).</li>
 							<li>Trees are created from the current state of the <span class="emphasized">index</span> (more on that later).</li>
-							<li>Trees are stored whenever a commit is made.</li>
+							<li>Trees are stored whenever a commit is made via <code>git commit</code>.</li>
 							<li>Trees made up of the same blobs/trees always hash to the same digest (type, size, contents).</li>
 						</ul>
 					</section>
@@ -519,8 +587,8 @@
 					<section>
 							<h4>directed acyclic graph structure</h4>
 
-							<p>Blobs record content of files.</p>
-							<p>Trees record directory structure.</p>
+							<p>Blobs record the content of files.</p>
+							<p>Trees record the directory structure by <em>pointing to blobs</em>.</p>
 							<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-tree.png" alt="graph-tree">
 					</section>
 				</section>
@@ -543,7 +611,7 @@
 					</section>
 
 					<section>
-						<pre><code class="shell" data-trim contenteditable>
+						<pre style="width: 100%"><code style="font-size: 22px" class="shell" data-trim contenteditable>
 							$ tree .git/objects
 							.git/objects
 							├── 35
@@ -563,9 +631,10 @@
 						</code></pre>
 
 						<ul style="font-size: 30px">
-							<li>Created alongside tree and points to it.</li>
-							<li>Also contains author, committer, timestamp and commit message.</li>
-							<li>Name is <span class="emphasized">SHA-1</span> digest of contents <span style="font-size: 25px">(and will thus be unique everytime and everywhere)</span>.</li>
+							<li>Created alongside tree via <code>git commit</code>.</li>
+							<li>DAG-view: Commit points to a specific tree (or directory states)</li>
+							<li>Contains author, committer, time stamp and commit message.</li>
+							<li>Name is <span class="emphasized">SHA-1</span> digest of contents <span style="font-size: 25px">(and will thus <em>always</em> be unique</span>).</li>
 						</ul>
 					</section>
 
@@ -576,9 +645,10 @@
 
 					<section>
 						<p>This gives us three <em>"levels"</em> of git objects:</p>
+						</br>
 						<ul style="font-size: 35px">
-							<li class="fragment">Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob.</li>
-							<li class="fragment">Level 2: <span class="emphasized">Trees</span> record the directory structure in a snapshot, of a collection of folders and file revisions.</li>
+							<li class="fragment">Level 1: <span class="emphasized">Blobs</span> record the content of files. Each new file or change gets its own blob.</li>
+							<li class="fragment">Level 2: <span class="emphasized">Trees</span> record a snapshot of the directory structure; a collection of folders and file revisions, by pointing to blobs.</li>
 							<li class="fragment">Level 3: <span class="emphasized">Commits</span> point to trees and provide meta-data.</li>
 						</ul>
 					</section>
@@ -588,18 +658,20 @@
 					<section style="font-size: 35px" data-menu-title="Committing via git plumbing commands">
 						<h5>Do you recall that <span class="emphasized">cat blob</span> we created manually?</h5>
 						<p>It's possible, using only <emp>git plumbing commands</emp>, to create a tree object that references it.</p>
-						<p>It's also possible to manually create a commit object that points to this tree and to notify our repo that this commit exists in our branch to make it reachable.</p>
+						<p>It's also possible to manually create a commit object that points to this tree and to notify our repo that this commit exists in our branch, in order to make it reachable.</p>
 						<br>
 						<p style="font-size: 25px">You can refer to <a href="https://jwiegley.github.io/git-from-the-bottom-up/1-Repository/4-how-trees-are-made.html">this</a> and <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">this</a> guide for a full overview.</p>
 					</section>
 
 					<section>
 						<p>1. Add the file to the staging area and write its contents to a tree object.</p>
-						<pre><code class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 24px" class="shell" data-trim contenteditable>
 							# add file to staging area - equivalent to `git add`
-							$  master 1  git update-index --add --cacheinfo 100644 99809ef5ef2a4458e883f53c0ce55fc9f7061844 cat
+							$  master 1  git update-index --add \
+							  --cacheinfo 100644 99809ef5ef2a4458e883f53c0ce55fc9f7061844 cat
 
-							# the index contains files and directories to be recorded by tree
+							# the index contains files and directories to be \
+							  recorded by the tree
 							$  master 1  git ls-files --stage
 							100644 blob 99809ef5ef2a4458e883f53c0ce55fc9f7061844	cat
 							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
@@ -613,14 +685,16 @@
 							100644 blob cfbc74af89ccf0d0ddbe488b4a2df7318786759d	dog
 						</code></pre>
 					</section>
-					<section style="font-size: 35px">
+					<section style="font-size: 30px">
 						<p>2. Next we create a new commit object and chain it the one before it.</p>
-						<pre><code class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 25px" class="shell" data-trim contenteditable>
 							# create commit object - normally handled by `git commit`
-							$  master ● 1 ✚ 1  echo "2nd commit manual" | git commit-tree a8fd4f7 -p fab9dd2
+							$  master ● 1 ✚ 1  echo "2nd commit manual" | \
+							  git commit-tree a8fd4f7 -p fab9dd2
 							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
 
-							$  master ● 1 ✚ 1  git cat-file -p 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+							$  master ● 1 ✚ 1  git cat-file -p \
+							  0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
 							tree a8fd4f7e27f7b943a6b1ae5e84430d56d234526c
 							parent fab9dd251f10ff00622bfd0f069e98b492d433c8
 							author Pieter <13552343+pmoris@users.noreply.github.com> 1535829462 +0200
@@ -631,9 +705,8 @@
 						<p class="fragment">This second commit object has an extra line containing a tree object!</p>
 						<p class="fragment">We're now ready to see how git keeps track of the <em>history</em> of our project.</p>
 					</section>
-
-					<!-- <section>
-						<p>So far so good, we've <span style="font-size:30px">(almost)</span> succesfully reproduced the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
+<!-- 
+					<section>
 						<p>We're now ready to see how git keeps track of the history of your project.</p>
 					</section> -->
 
@@ -646,8 +719,8 @@
 					<section>
 						<ul style="font-size: 35px">
 							<li>Level 1: <span class="emphasized">Blobs</span> record content of files. Each new file or change gets its own blob. <span class="fragment"><strong>Identical blobs are re-used by trees.</strong></span></li>
-							<li>Level 2: <span class="emphasized">Trees</span> record the directory structure in a snapshot, of a collection of folders and file revisions.</li>
-							<li>Level 3: <span class="emphasized">Commits</span> point to trees, provide meta-data <span class="fragment"><strong>and can be chained to one another in order to form a history</strong>.</span></li>
+							<li>Level 2: <span class="emphasized">Trees</span> record a snapshot of the directory structure; a collection of folders and file revisions, by pointing to blobs.</li>
+							<li>Level 3: <span class="emphasized">Commits</span> point to trees, provide meta-data <span class="fragment"><strong>and form a history or timeline by pointing to parent commits.</strong>.</span></li>
 						</ul>
 						<br>
 						<br>
@@ -655,8 +728,8 @@
 					</section>
 
 					<section>
-						<p>At this point we can recall the history by calling the log command directly on the new commit.</p>
-						<pre><code class="shell" data-trim contenteditable>
+						<p>At this point, we can recall the history by calling the <code>log</code> command directly on the new commit.</p>
+						<pre><code style="font-size: 22px" class="shell" data-trim contenteditable>
 							$   master ● 1 ✚ 1  git log --stat 0ed44be
 							commit 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
 							Author: Pieter <13552343+pmoris@users.noreply.github.com>
@@ -724,13 +797,13 @@
 					<section>
 						<h4>directed acyclic graph structure</h4>
 						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-master-manual.png" alt="graph-master">
-						<p style="font-size: 35px">The master branch is pointing to the initial commit we created using the regular <span class="emphasized">porcelain</span> commands.</p>
+						<p style="font-size: 35px">The master branch is pointing to the initial commit that we created using the regular <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
 						<!-- <p>These are the objects we created using the <span class="emphasized">plumbing</span> commands.</p> -->
 					</section>
 
 					<section>
 						<p style="font-size: 30px">We can update the master reference to point to the new commit.</p>
-						<pre><code class="shell" data-trim contenteditable>
+						<pre style="width: 100%"><code style="font-size: 24px" class="shell" data-trim contenteditable>
 							$  master ● 1 ✚ 1  git update-ref refs/heads/master 0ed44be
 
 							$  master ✚ 1  cat .git/refs/heads/master
@@ -762,7 +835,7 @@
 					</section>
 
 					<section>
-						<pre><code class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 24px" class="shell" data-trim contenteditable>
 							# retrieve the cat object from our repository
 							# and place it in the working directory to tidy up
 							$  master ✚ 1  git cat-file -p 99809ef5 > cat
@@ -780,7 +853,7 @@
 							0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
 						</code></pre>
 
-						<p>Creating a new branch merely adds a reference to the same commit we were on before. It is literally <span class="emphasized">just a text file</span>.</p>
+						<p style="font-size: 35px">Creating a new branch merely adds a reference to the same commit that we were on before. It is literally <span class="emphasized">just a text file</span>.</p>
 					</section>
 
 					<section>
@@ -792,10 +865,15 @@
 						<pre><code class="shell" data-trim contenteditable>
 							$  no-cats-allowed  git rm cat
 							rm 'cat'
+
 							$  no-cats-allowed ● 1  mkdir doge
+
 							$  no-cats-allowed ● 1  echo "bark" > doge/much
+
 							$  no-cats-allowed ● 1 … 1  echo "floof" > doge/very
+
 							$  no-cats-allowed ● 1 … 1  git add doge/
+
 							$  no-cats-allowed ● 3  git status
 							On branch no-cats-allowed
 							Changes to be committed:
@@ -804,25 +882,29 @@
 								deleted:    cat
 								new file:   doge/much
 								new file:   doge/very
-
-							$  no-cats-allowed ● 3  git commit -m "doggies"
-							[no-cats-allowed 40da2ef] doggies
-								3 files changed, 2 insertions(+), 1 deletion(-)
-								delete mode 100644 cat
-								create mode 100644 doge/much
-								create mode 100644 doge/very
-
-							$  no-cats-allowed  git rev-parse HEAD
-							40da2ef175b6693c785251467946f1cdaf5e6552
-							$  no-cats-allowed  git cat-file -p HEAD
-							tree 60c51895339b14261e18cb4555b4a43d1cfdc397
-							parent 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
-							author Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
-							committer Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
-
-							doggies
 						</code></pre>
 					</section>
+					<section>
+							<pre><code class="shell" data-trim contenteditable>
+								$  no-cats-allowed ● 3  git commit -m "doggies"
+								[no-cats-allowed 40da2ef] doggies
+									3 files changed, 2 insertions(+), 1 deletion(-)
+									delete mode 100644 cat
+									create mode 100644 doge/much
+									create mode 100644 doge/very
+
+								$  no-cats-allowed  git rev-parse HEAD
+								40da2ef175b6693c785251467946f1cdaf5e6552
+
+								$  no-cats-allowed  git cat-file -p HEAD
+								tree 60c51895339b14261e18cb4555b4a43d1cfdc397
+								parent 0ed44be76b3ae96cb3fa7e3501f8ba56e488f7f1
+								author Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+								committer Pieter <13552343+pmoris@users.noreply.github.com> 1535872422 +0200
+
+								doggies
+							</code></pre>
+						</section>
 
 					<section>
 						<h4>directed acyclic graph structure</h4>
@@ -838,7 +920,7 @@
 
 					<section>
 						<p>How does git know which working directory to show us and which branch to operate on when we use porcelain commands like <code>git commit</code>?</p>
-
+						</br>
 						<p class="fragment">That's where <span class="emphasized">HEAD</span> comes into play.</p>
 					</section>
 
@@ -885,14 +967,16 @@
 						<h4>Detached HEAD?!1</h4>
 
 						<p>A <span style="font-size: 30px">(rather odd)</span> way of saying that we are checking out a commit that <span class="emphasized">no branch points to directly</span>.</p>
+					</section>
 
+					<section>
 						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-det-head.png" alt="graph-det-head">
 					</section>
 
 					<section>
 							<h4>What's the problem of having a detached HEAD?</h4>
-							<p class="fragment">When you checkout a commit instead of a branch, HEAD is now pointing directly to this commit, instead of to a ref/branch.</p>
-							<p class="fragment">This means that you won't be able to reach this commit again in the future (unless you remember its hash) and <code>git</code>'s garbage collection will remove it at some point'.</p>
+							<p class="fragment">When you <code>checkout</code> a <em>commit</em> instead of a <em>branch</em>, HEAD will point directly to this commit, instead of to a ref/branch.</p>
+							<p class="fragment">This means that you won't be able to reach this commit again in the future (unless you remember its hash) and git's garbage collection will remove it at some point'.</p>
 					</section>
 					<section>
 						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-det-head-commits.png" alt="graph-det-head">
@@ -912,6 +996,7 @@
 					</section>
 					<section>
 						<p>Conceptually it's an ever-changing tree object stored as a single large binary file .git/index</p>
+					</br>
 						<p>It can be viewed via (see previous slides)</p>
 						<pre><code class="shell" data-trim contenteditable>
 							$  master 1  git ls-files --stage
@@ -920,6 +1005,8 @@
 						</code></pre>
 					</section>
 					<section>
+						<h4>Why staging/an index?</h4>
+					</br>
 						<ul>
 							<li>Easy way to reset without reverting commits.</li>
 							<li>Allows splitting new changes into multiple commits.</li>
@@ -1008,7 +1095,7 @@
 					</section>
 
 					<section>
-						<h4>Reset can do a few different things depending on the parameter you pass.</h4>
+						<h4>Reset can do a few different things depending on the parameter you pass</h4>
 						<pre><code class="shell" data-trim contenteditable>
 							git reset [&lt;mode&gt;] [&lt;commit&gt;]
 						</code></pre>
@@ -1077,7 +1164,9 @@
 					<section data-menu-title="Pretty graphs in the CLI">
 						<h4>Pretty git graphs in the CLI</h4>
 						<br>
-						<pre><code class="shell" data-trim contenteditable>git log --oneline --abbrev-commit --all --graph --decorate --color</code></pre>
+						<pre><code class="shell" data-trim contenteditable>
+							git log --oneline --abbrev-commit --all \
+							        --graph --decorate --color</code></pre>
 						<p style="font-size: 20px">See <a href="https://stackoverflow.com/questions/1838873/visualizing-branch-topology-in-git/34467298#34467298">this SO post</a> for even more elaborate options (hint: create an alias...).</p>
 					</section>
 
@@ -1134,7 +1223,8 @@
 						</code></pre>
 						<p>Or equivalently</p>
 						<pre><code class="shell" data-trim contenteditable>
-							git push origin master; git branch --set-upstream master origin/master
+							git push origin master
+							git branch --set-upstream master origin/master
 						</code></pre>
 						<p>Makes current branch track a remote one, i.e. allows pushing/pulling without specifying the remote ref name.</p>
 					</section>
@@ -1264,10 +1354,10 @@
 
 					<section>
 						<h3>Challenges</h3>
-						<ol style="font-size: 20px">
+						<ol style="font-size: 24px">
 							<li>Create a simple "Hello World" repository with a few commits and/or branches, keeping an eye on the <code>.git/objects</code> directory as you do so and using the <code>git cat-file -p/t</code> commands to inspect new objects.</li>
 							<li>What would happen if you delete the <code>.git/index</code> file after staging content? Think about it, then try it!</li>
-							<li>Does a <code>git commit --amend</code> change the name (i.e. SHA-1 digest) of the commit that is updated? Think about it, then try it! <span style="font-size: 25px">Read up on the amend command <a href="https://www.atlassian.com/git/tutorials/rewriting-history">here</a> if you're not familiar with this command.</span></li>
+							<li>Does a <code>git commit --amend</code> change the name (i.e. SHA-1 digest) of the commit that is updated? Think about it, then try it! <span style="font-size: 20px">Read up on the amend command <a href="https://www.atlassian.com/git/tutorials/rewriting-history">here</a> if you're not familiar with this command.</span></li>
 							<li>Create a copy of your repository and append a single character to 1 of the objects in .git/objects. Use <code>git status</code> and <git>git fsck</git> to see how git deals with the damage you've caused.</li>
 							<li>Use <code>git checkout</code> on a commit's hash directly (instead of on a ref). What will happen if you create a new commit here? Inspect the graph and try to find a route that can reach this new commit. Look up the <code>git prune</code> command.</li>
 							<li>Suppose that, after committing a few times, we modify an existing file, add it to the index and then modify it again. What will happen when we try to checkout a different branch? Think about how the working tree, index and commit you're trying to checkout differ. You can look up the answer in "Git from the inside out".</li>
@@ -1280,6 +1370,7 @@
 							<li>Explore the git game: <a href="https://www.git-game.com/">https://www.git-game.com/</a>.</li>
 							<li>Or the interactive guide to branching, cherry-picking and rebasing: <a href="https://learngitbranching.js.org/">https://learngitbranching.js.org/</a>.</li>
 						</ol>
+						</br>
 						<p>For all of these activities, try to keep the DAG structure of git in the back of your mind.</p>
 					</section>
 				</section>

@@ -1,3 +1,18 @@
+	<section data-markdown>
+						<script type="text/template">
+							<!-- .slide: style="font-size: 35px" -->
+							### Distributed version control system
+
+							* _Snapshots_<!-- .element: class="emphasized" -->: keep track of previous versions of files 
+							* _Distributed_<!-- .element: class="emphasized" -->: mirror your project (and its history) on different machines.
+								* There can be many remote repositories, GitHub is just one example.
+								* Also allows you to work offline.
+						</script>
+					</section>
+
+					
+
+
 					<section class="fig-container"
 							data-file="assets/d3js/graph.html"> <!-- path to the html file with visualization code -->
 					</section>
