@@ -886,6 +886,15 @@
 
 						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-det-head.png" alt="graph-det-head">
 					</section>
+
+					<section>
+							<h4>What's the problem of having a detached HEAD?</h4>
+							<p class="fragment">When you checkout a commit instead of a branch, HEAD is now pointing directly to this commit, instead of to a ref/branch.</p>
+							<p class="fragment">This means that you won't be able to reach this commit again in the future (unless you remember its hash) and <code>git</code>'s garbage collection will remove it at some point'.</p>
+					</section>
+					<section>
+						<img style="border: 0; background: none;" class="stretch" data-src="assets/img/graph-branch2-det-head-commits.png" alt="graph-det-head">
+					</section>
 				</section>
 
 				<section>
