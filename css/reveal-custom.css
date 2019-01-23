@@ -1741,7 +1741,8 @@ body {
 }
 
 span.emphasized {
-  color: #2f8e5a;
+  color: #2acc80;
+  /* color: #2f8e5a; */
   /* color: #3c8965; */
   font-style: italic;
 }

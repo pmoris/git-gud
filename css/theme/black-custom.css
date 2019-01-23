@@ -157,6 +157,7 @@ body {
 .reveal code {
   font-family: 'Fira Code', monospace;
   text-transform: none; }
+  padding: 5px;
 
 .reveal pre code {
   display: block;
@@ -211,7 +212,8 @@ body {
  *********************************************/
 .reveal a {
   /* color: #3c8965; */
-  color: #2f8e5a;
+  /* color: #2f8e5a; */
+  color: #2acc80;
   text-decoration: none;
   -webkit-transition: color .15s ease;
   -moz-transition: color .15s ease;
@@ -225,7 +227,8 @@ body {
 .reveal .roll span:after {
   color: #fff;
   /* background: #3c8965; } */
-  background: #2f8e5a; }
+  /* background: #2f8e5a;  */
+  color: #2acc80; }
 
 /*********************************************
  * IMAGES
