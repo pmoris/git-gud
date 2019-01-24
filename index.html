@@ -311,8 +311,7 @@
 						</aside>
 					</section>
 
-					<!-- <section data-background="#dddddd"> -->
-					<section>
+					<section data-background="#dddddd">
 						<img style="border: 0;" height="50%" data-src="assets/img/git-transport.png" alt="they-said">
 						<p style="font-size: 20px">Source: <a href="https://blog.osteele.com/2008/05/my-git-workflow/">https://blog.osteele.com/2008/05/my-git-workflow/</a></p>
 					</section>
@@ -771,7 +770,7 @@
 					<section>
 						<p>So far so good, we've <span style="font-size:30px">(almost)</span> succesfully reproduced the <span class="emphasized">porcelain</span> command <code>git commit</code>.</p>
 						<br>
-						<p class="fragment">But why doesn't the regular git status command work at this point? And where do branches come into play?</p>
+						<p class="fragment">But why doesn't the regular <code>git status</code> command work at this point? And where do branches come into play?</p>
 					</section>
 				</section>
 
@@ -1050,7 +1049,7 @@
 					<section style="font-size: 35px">
 						<h3>Git is also a <span class="emphasized">Merkle Graph</span></h3>
 						<p>The <span class="emphasized">SHA-1</span> hash names used for git objects provides an elegant way to verify the integrity of all the data in the repository.</p>
-						<p class="fragment">The hash of any one object depends on the hashes (and contents) of all the files that came before it. A similar technique is used by Bitcoin and BitTorrent. <span style="font-size: 25px">(But <a href="https://stackoverflow.com/questions/46192377/why-is-git-not-considered-a-block-chain">don't call git a blockchain</a> unless you want to anger some people.)</span></p>
+						<p class="fragment">The hash of any one object depends on the hashes (and contents) of all the files that came before it. A similar technique is used by Bitcoin and BitTorrent. <span style="font-size: 25px">(But <a href="https://stackoverflow.com/questions/46192377/why-is-git-not-considered-a-block-chain">don't call git a blockchain</a> unless you want to upset some people.)</span></p>
 						<p class="fragment">This is also the reason why re-writing history can be dangerous in git. Everything downstream will be affected. <span style="font-size: 25px">(Although this generally only becomes a problem when working with collaborators.)</span></p>
 					</section>
 				</section>
@@ -1061,7 +1060,7 @@
 					</section>
 					<section>
 						<p>When merging branches, each commit is interpreted as a set of changes.</p>
-						<p>Each merge tries to reconsolidate (at least) three different snapshots: the ones you provide in the command and their parent.</p>
+						<p>Each merge tries to consolidate (at least) three different snapshots: the ones you provide in the command and their parent.</p>
 					</section>
 
 					<section>
