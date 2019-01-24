@@ -236,7 +236,7 @@
 							<!-- .slide: style="font-size: 35px" -->
 							## Creation
 
-							```
+							```sh
 							# create a new repository
 							git init
 							# or retrieve an existing one
@@ -247,6 +247,11 @@
 					<section data-markdown>
 						<script type="text/template">
 							## Tracking changes
+
+							```sh
+							git add file1 file2 # or git add -A
+							git commit -m "my first commit!"
+							```
 
 							![](assets/img/add-commit.png)<!-- .element height="30%" width="30%" -->
 
@@ -264,6 +269,15 @@
 						<script type="text/template">
 							## Branches
 
+							```sh
+							git checkout -b feature_x # create and move to branch
+							#
+							# do some work
+							#
+							git checkout master # hop back to main branch
+							git merge feature_x # pull in changes
+							```
+
 							![](assets/img/branches.png) <!-- .element height="50%" width="50%" -->
 
 							Source:<!-- .element: style="font-size: 20px" --> https://rogerdudler.github.io/git-guide/<!-- .element: style="font-size: 20px" -->
@@ -278,14 +292,18 @@
 						<script type="text/template">
 							## Sharing
 
-							```
+							```sh
 							# sharing your changes
 							git remote add origin <server>
 							git push origin master
 
 							# retrieving changes
-							git pull # or fetch and merge
+							git pull origin master
+							# or fetch and merge
+							git fetch origin
+							git merge master
 							```
+
 						</script>
 						<aside class="notes">
 							different repositories that can be synchronised
@@ -455,7 +473,7 @@
 
 							Git usually only requires a few hash digits to uniquely identify objects.
 
-							```
+							```sh
 							$ # read object type using short identifier
 							$ git cat-file -t cfbc74a
 							blob
@@ -473,7 +491,7 @@
 
 							We couldn't read the contents of the blob directly because files are compressed with zlib first.
 
-							```
+							```sh
 							$ python2 -c 'import sys,zlib; \
 							$	print zlib.decompress(sys.stdin.read());' \
 							$		< .git/objects/cf/bc74af89ccf0d0ddbe488b4a2df7318786759d
@@ -498,7 +516,7 @@
 						<script type="text/template">
 							You can even manually create git objects in this manner.
 
-							```
+							```sh
 							$ echo 'miauw' | git hash-object -w --stdin
 							$ tree .git/objects/
 							.git/objects/
