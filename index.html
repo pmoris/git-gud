@@ -562,7 +562,7 @@
 					<section style="font-size: 40px">
 						<h4>Tree objects record the directory structure.</h4>
 
-						<pre><code style="font-size: 23px" class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 23px" class="sh" data-trim contenteditable>
 							$ tree .git/objects
 							.git/objects
 							├── 35
@@ -633,7 +633,7 @@
 					</section>
 
 					<section>
-						<pre style="width: 100%"><code style="font-size: 20px" class="shell" data-trim contenteditable>
+						<pre style="width: 100%"><code style="font-size: 20px" class="sh" data-trim contenteditable>
 							$ tree .git/objects
 							.git/objects
 							├── 35
@@ -688,7 +688,7 @@
 
 					<section>
 						<p>1. Add the file to the staging area (or index).</p>
-						<pre><code style="font-size: 24px" class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 24px" class="sh" data-trim contenteditable>
 							# add file to staging area
 							# - normally handled by `git add`
 							$  master 1  git update-index --add \
@@ -704,7 +704,7 @@
 					</section>
 					<section>
 						<p>2. Write the index contents to a tree object.</p>
-						<pre><code style="font-size: 24px" class="shell" data-trim contenteditable>
+						<pre><code style="font-size: 24px" class="sh" data-trim contenteditable>
 							# create tree object from index
 							# - normally handled by `git commit`
 							$  master ● 1 ✚ 1  git write-tree
